@@ -23,4 +23,7 @@ public class UserUpdateRequest {
     @NotNull(message = "USER_DATE_OF_BIRTH_NOT_NULL")
     @DateOfBirthConstraint(minAge = 18)
     LocalDate dateOfBirth;
+
+    @NotNull(message = "USER_CITY_NOT_NULL")
+    String city;
 }

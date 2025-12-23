@@ -1,5 +1,6 @@
 package vn.van.identity_service.dto.response;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,5 +18,6 @@ public class UserResponse {
     String lastName;
     String email;
     LocalDate dateOfBirth;
+    String city;
     Set<RoleResponse> roles;
 }
