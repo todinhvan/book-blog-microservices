@@ -20,6 +20,9 @@ server:
     context-path: /identity
 
 app:
+  config:
+    jwt-secret: ${APP_CONFIG_JWT_SECRET}
+    token-expire-time: 5 # 5 second
   default:
     user:
       email: ${APP_DEFAULT_USER_EMAIL}

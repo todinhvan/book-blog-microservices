@@ -18,6 +18,7 @@ public enum ResponseMessage {
     PERMISSION_CREATED(HttpStatus.CREATED, "Permission Created"),
     PERMISSION_GET_ALL(HttpStatus.OK, "Permission Get All"),
     PERMISSION_DELETED(HttpStatus.NO_CONTENT, "Permission Deleted"),
+    LOGIN_SUCCESS(HttpStatus.OK, "Login Success"),
     // Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"),
     INVALID_KEY_RESPONSE_MESSAGE(HttpStatus.BAD_REQUEST, "Invalid Key Response"),
@@ -27,6 +28,7 @@ public enum ResponseMessage {
     ROLE_EXISTED(HttpStatus.CONFLICT, "Role already exists"),
     PERMISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Permission not found"),
     PERMISSION_EXISTED(HttpStatus.CONFLICT, "Permission already exists"),
+    LOGIN_FAILURE(HttpStatus.UNAUTHORIZED, "Email or password incorrect"),
     // Error field
     USER_FIRST_NAME_NOT_BLANK("User: First name is not empty"),
     USER_LAST_NAME_NOT_NULL("User: Last name is require"),
