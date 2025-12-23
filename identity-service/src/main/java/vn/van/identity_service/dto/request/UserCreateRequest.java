@@ -1,51 +1,33 @@
 package vn.van.identity_service.dto.request;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
+
 import java.time.LocalDate;
 
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserCreateRequest {
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String password;
-    private LocalDate dateOfBirth;
+    @NotBlank(message = "USER_FIRST_NAME_NOT_BLANK")
+    String firstName;
 
-    public String getFirstName() {
-        return firstName;
-    }
+    @NotNull(message = "USER_LAST_NAME_NOT_NULL")
+    String lastName;
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+    @Email(message = "USER_EMAIL_INVALID")
+    String email;
 
-    public String getLastName() {
-        return lastName;
-    }
+    @NotBlank(message = "USER_PASSWORD_INVALID")
+    @Size(min = 4, message = "USER_PASSWORD_INVALID")
+    String password;
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
+    @NotNull(message = "USER_DATE_OF_BIRTH_INVALID")
+    LocalDate dateOfBirth;
 }

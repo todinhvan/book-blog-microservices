@@ -1,33 +1,24 @@
 package vn.van.identity_service.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
+
 import java.time.LocalDate;
 
+@Getter
+@Setter
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserUpdateRequest {
-    private String firstName;
-    private String lastName;
-    private LocalDate dateOfBirth;
+    @NotBlank(message = "USER_FIRST_NAME_NOT_BLANK")
+    String firstName;
 
-    public String getFirstName() {
-        return firstName;
-    }
+    @NotNull(message = "USER_LAST_NAME_NOT_NULL")
+    String lastName;
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
+    @NotNull(message = "USER_DATE_OF_BIRTH_INVALID")
+    LocalDate dateOfBirth;
 }

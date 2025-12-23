@@ -1,53 +1,20 @@
 package vn.van.identity_service.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 
+@Getter
+@Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ApiResponse<T> {
-    private int statusCode;
-    private HttpStatus status;
-    private String message;
-    private T data;
-    private T error;
-
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
-    }
-
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(HttpStatus status) {
-        this.status = status;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    public T getError() {
-        return error;
-    }
-
-    public void setError(T error) {
-        this.error = error;
-    }
+    int statusCode;
+    HttpStatus status;
+    String message;
+    T data;
+    T error;
 }

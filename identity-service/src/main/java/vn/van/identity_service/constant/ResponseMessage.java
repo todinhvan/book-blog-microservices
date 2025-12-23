@@ -1,7 +1,9 @@
 package vn.van.identity_service.constant;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
+@Getter
 public enum ResponseMessage {
     // Success
     USER_CREATED(HttpStatus.CREATED, "User Created"),
@@ -11,14 +13,20 @@ public enum ResponseMessage {
     USER_DELETED(HttpStatus.NO_CONTENT, "User Deleted"),
     // Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"),
+    INVALID_KEY_RESPONSE_MESSAGE(HttpStatus.BAD_REQUEST, "Invalid Key Response"),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),
     USER_EXISTED(HttpStatus.CONFLICT, "User already exists"),
     // Error field
+    USER_FIRST_NAME_NOT_BLANK("User: First name is not empty"),
+    USER_LAST_NAME_NOT_NULL("User: Last name is require"),
+    USER_EMAIL_INVALID("User: Email is invalid"),
+    USER_PASSWORD_INVALID("User: Password must be greater than or equals to 4 characters"),
+    USER_DATE_OF_BIRTH_INVALID("User: Date of birth is invalid format (YYYY-MM-DD)")
     ;
 
-    private int statusCode;
-    private HttpStatus status;
-    private String message;
+    private final int statusCode;
+    private final HttpStatus status;
+    private final String message;
 
     ResponseMessage(String message) {
         this(HttpStatus.UNPROCESSABLE_ENTITY.value(), HttpStatus.UNPROCESSABLE_ENTITY, message);
@@ -32,17 +40,5 @@ public enum ResponseMessage {
         this.statusCode = statusCode;
         this.status = status;
         this.message = message;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    public HttpStatus getStatus() {
-        return status;
-    }
-
-    public String getMessage() {
-        return message;
     }
 }
