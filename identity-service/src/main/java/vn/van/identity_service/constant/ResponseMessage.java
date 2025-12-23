@@ -34,6 +34,8 @@ public enum ResponseMessage {
     LOGOUT_SUCCESS(HttpStatus.OK, "Logout Success"),
     INTROSPECT_SUCCESS(HttpStatus.OK, "Introspect Success"),
     REFRESH_TOKEN_SUCCESS(HttpStatus.OK, "Refresh Token Success"),
+    FORBIDDEN(HttpStatus.FORBIDDEN, "Forbidden"),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Unauthorized"),
     // Error field
     USER_FIRST_NAME_NOT_BLANK("User: First name is not empty"),
     USER_LAST_NAME_NOT_NULL("User: Last name is require"),

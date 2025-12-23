@@ -3,6 +3,7 @@ package vn.van.identity_service.exception;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -46,6 +47,14 @@ public class GlobalExceptionHandler {
 
 
         ApiResponse<?> response = toApiResponse(responseMessage, message);
+        return new ResponseEntity<>(response, responseMessage.getStatus());
+    }
+
+    @ExceptionHandler(value = AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<?>> handleAccessDeniedException(AccessDeniedException e) {
+        log.error(e.toString());
+        ResponseMessage responseMessage = ResponseMessage.FORBIDDEN;
+        ApiResponse<?> response = toApiResponse(responseMessage, null);
         return new ResponseEntity<>(response, responseMessage.getStatus());
     }
 

@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.dto.request.AuthenticationRequest;
 import vn.van.identity_service.dto.request.LoginRequest;
@@ -28,6 +29,8 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Objects;
+import java.util.StringJoiner;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -129,6 +132,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .issuer("van.vn")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(tokenExpireTime, ChronoUnit.SECONDS).toEpochMilli()))
+                .jwtID(UUID.randomUUID().toString())
+                .claim("scope", buildScope(user))
+                .claim("user-id", user.getId())
                 .build();
         Payload payload = new Payload(claimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
@@ -139,5 +145,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (JOSEException e) {
             throw new ApplicationException(ResponseMessage.SECRET_KEY_INVALID);
         }
+    }
+
+    private String buildScope(User user) {
+        StringJoiner sj = new StringJoiner(" ");
+        if (!CollectionUtils.isEmpty(user.getRoles())) {
+            user.getRoles().forEach(role -> {
+                sj.add("ROLE_" + role.getName());
+                if (!CollectionUtils.isEmpty(role.getPermissions())) {
+                    role.getPermissions().forEach(permission -> {
+                        sj.add(permission.getName());
+                    });
+                }
+            });
+        }
+        return sj.toString();
     }
 }

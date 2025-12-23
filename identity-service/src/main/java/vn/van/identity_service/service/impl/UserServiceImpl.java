@@ -3,7 +3,12 @@ package vn.van.identity_service.service.impl;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.constant.RoleType;
@@ -23,6 +28,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     RoleRepository roleRepository;
@@ -30,6 +36,7 @@ public class UserServiceImpl implements UserService {
     PasswordEncoder passwordEncoder;
 
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('CREATE')")
     public UserResponse createUser(UserCreateRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ApplicationException(ResponseMessage.USER_EXISTED);
@@ -44,6 +51,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('GET')")
     public UserResponse getUser(String userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ApplicationException(ResponseMessage.USER_NOT_FOUND));
@@ -51,11 +59,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('GET_ALL')")
     public List<UserResponse> getAllUsers() {
+        Authentication context = SecurityContextHolder.getContext().getAuthentication();
+        context.getAuthorities().forEach(grantedAuthority -> log.info(grantedAuthority.toString()));
+        Jwt jwt = (Jwt) context.getPrincipal();
+        log.info(jwt.getClaimAsString("user-id"));
+
         return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('UPDATE')")
+//    @PostAuthorize("returnObject.email == authentication.name")
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
         User user = existsUser(userId);
         userMapper.updateUser(user, request);
@@ -64,6 +80,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('DELETE')")
     public void deleteUser(String userId) {
         User user = existsUser(userId);
         userRepository.delete(user);
