@@ -19,8 +19,10 @@ import vn.van.identity_service.dto.request.AuthenticationRequest;
 import vn.van.identity_service.dto.request.LoginRequest;
 import vn.van.identity_service.dto.response.AuthenticationResponse;
 import vn.van.identity_service.dto.response.IntrospectResponse;
+import vn.van.identity_service.entity.BlacklistToken;
 import vn.van.identity_service.entity.User;
 import vn.van.identity_service.exception.ApplicationException;
+import vn.van.identity_service.repository.BlacklistTokenRepository;
 import vn.van.identity_service.repository.UserRepository;
 import vn.van.identity_service.service.AuthenticationService;
 
@@ -38,6 +40,7 @@ import java.util.UUID;
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
     UserRepository userRepository;
+    BlacklistTokenRepository blacklistTokenRepository;
     PasswordEncoder passwordEncoder;
 
     @NonFinal
@@ -70,10 +73,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public void logout(AuthenticationRequest request) {
         try {
             SignedJWT signedJWT = verifyToken(request.getToken(), true);
-            if (Objects.isNull(signedJWT)) {
-                throw new ApplicationException(ResponseMessage.TOKEN_INVALID);
-            }
+            saveBlacklistToken(
+                    signedJWT.getJWTClaimsSet().getJWTID(),
+                    signedJWT.getJWTClaimsSet().getExpirationTime()
+            );
         } catch (ParseException | JOSEException | ApplicationException e) {
+            log.error(e.toString());
             log.warn("Force Logout");
         }
     }
@@ -82,9 +87,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public IntrospectResponse introspect(AuthenticationRequest request) {
         boolean isValid = true;
         try {
-            SignedJWT signedJWT = verifyToken(request.getToken(), false);
-            if (Objects.isNull(signedJWT)) isValid = false;
-        } catch (ParseException | JOSEException e) {
+            verifyToken(request.getToken(), false);
+        } catch (ParseException | JOSEException | ApplicationException e) {
+            log.error(e.toString());
             isValid = false;
         }
 
@@ -97,9 +102,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public AuthenticationResponse refreshToken(AuthenticationRequest request) {
         try {
             SignedJWT signedJWT = verifyToken(request.getToken(), true);
-            if (Objects.isNull(signedJWT)) {
-                throw new ApplicationException(ResponseMessage.TOKEN_INVALID);
-            }
+            saveBlacklistToken(
+                    signedJWT.getJWTClaimsSet().getJWTID(),
+                    signedJWT.getJWTClaimsSet().getExpirationTime()
+            );
 
             User user = userRepository.findByEmail(signedJWT.getJWTClaimsSet().getSubject())
                     .orElseThrow(() -> new ApplicationException(ResponseMessage.USER_NOT_FOUND));
@@ -107,8 +113,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             response.setToken(generateToken(user));
             return response;
         } catch (ParseException | JOSEException e) {
+            log.error(e.toString());
             throw new ApplicationException(ResponseMessage.TOKEN_INVALID);
         }
+    }
+
+    private void saveBlacklistToken(String jwtId, Date expirationTime) {
+        BlacklistToken blacklistToken = new BlacklistToken();
+        blacklistToken.setId(jwtId);
+        blacklistToken.setExpirationTime(expirationTime);
+        blacklistTokenRepository.save(blacklistToken);
     }
 
     private SignedJWT verifyToken(String token, boolean isRefresh) throws ParseException, JOSEException {
@@ -118,11 +132,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 ? new Date(signedJWT.getJWTClaimsSet().getIssueTime()
                     .toInstant().plus(refreshTokenExpireTime, ChronoUnit.SECONDS).toEpochMilli())
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
+        String jwtId = signedJWT.getJWTClaimsSet().getJWTID();
 
         boolean isVerify = signedJWT.verify(verifier);
         boolean isNotExpire = expirationTime.after(new Date());
+        boolean isNotExistedInBlacklist = !(blacklistTokenRepository.existsById(jwtId));
 
-        return (isVerify && isNotExpire) ? signedJWT : null;
+        if (!(isVerify && isNotExpire && isNotExistedInBlacklist)) {
+            throw new ApplicationException(ResponseMessage.TOKEN_INVALID);
+        }
+
+        return signedJWT;
     }
 
     private String generateToken(User user) {

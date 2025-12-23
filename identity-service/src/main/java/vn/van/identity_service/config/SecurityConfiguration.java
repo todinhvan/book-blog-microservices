@@ -29,6 +29,8 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class SecurityConfiguration {
 
+    private final BlacklistTokenValidator blacklistTokenValidator;
+
     @Value("${app.config.jwt-secret}")
     private String jwtSecret;
 
@@ -63,7 +65,8 @@ public class SecurityConfiguration {
                 .build();
 
         OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(
-                new JwtTimestampValidator(Duration.ofSeconds(5)) // permit valid token plus 5s, if not set then default 60s
+                new JwtTimestampValidator(Duration.ofSeconds(5)), // permit valid token plus 5s, if not set then default 60s
+                blacklistTokenValidator
         );
         decoder.setJwtValidator(validator);
         return decoder;
