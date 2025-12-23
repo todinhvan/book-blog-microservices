@@ -23,6 +23,7 @@ app:
   config:
     jwt-secret: ${APP_CONFIG_JWT_SECRET}
     token-expire-time: 5 # 5 second
+    refresh-token-expire-time: 240 # 240 second
   default:
     user:
       email: ${APP_DEFAULT_USER_EMAIL}

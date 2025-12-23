@@ -29,6 +29,11 @@ public enum ResponseMessage {
     PERMISSION_NOT_FOUND(HttpStatus.NOT_FOUND, "Permission not found"),
     PERMISSION_EXISTED(HttpStatus.CONFLICT, "Permission already exists"),
     LOGIN_FAILURE(HttpStatus.UNAUTHORIZED, "Email or password incorrect"),
+    TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "Token invalid"),
+    SECRET_KEY_INVALID(HttpStatus.UNAUTHORIZED, "Secret key invalid"),
+    LOGOUT_SUCCESS(HttpStatus.OK, "Logout Success"),
+    INTROSPECT_SUCCESS(HttpStatus.OK, "Introspect Success"),
+    REFRESH_TOKEN_SUCCESS(HttpStatus.OK, "Refresh Token Success"),
     // Error field
     USER_FIRST_NAME_NOT_BLANK("User: First name is not empty"),
     USER_LAST_NAME_NOT_NULL("User: Last name is require"),
