@@ -28,3 +28,5 @@ app:
     user:
       email: ${APP_DEFAULT_USER_EMAIL}
       password: ${APP_DEFAULT_USER_PASSWORD}
+    cron:
+      clean-blacklist-token-expired: "0 0 0 * * *"
