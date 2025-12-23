@@ -6,22 +6,26 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import vn.van.identity_service.constant.ResponseMessage;
+import vn.van.identity_service.constant.RoleType;
 import vn.van.identity_service.dto.request.UserCreateRequest;
 import vn.van.identity_service.dto.request.UserUpdateRequest;
 import vn.van.identity_service.dto.response.UserResponse;
 import vn.van.identity_service.entity.User;
 import vn.van.identity_service.exception.ApplicationException;
 import vn.van.identity_service.mapper.UserMapper;
+import vn.van.identity_service.repository.RoleRepository;
 import vn.van.identity_service.repository.UserRepository;
 import vn.van.identity_service.service.UserService;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserServiceImpl implements UserService {
     UserRepository userRepository;
+    RoleRepository roleRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
 
@@ -33,6 +37,8 @@ public class UserServiceImpl implements UserService {
 
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         User user = userMapper.toUser(request);
+        user.setRoles(Set.of(roleRepository.findById(RoleType.USER.name())
+                .orElseThrow(() -> new ApplicationException(ResponseMessage.ROLE_NOT_FOUND))));
         userRepository.save(user);
         return userMapper.toUserResponse(user);
     }
