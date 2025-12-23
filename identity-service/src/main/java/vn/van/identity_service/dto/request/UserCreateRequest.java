@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
+import vn.van.identity_service.validator.DateOfBirthConstraint;
 
 import java.time.LocalDate;
 
@@ -28,6 +29,7 @@ public class UserCreateRequest {
     @Size(min = 4, message = "USER_PASSWORD_INVALID")
     String password;
 
-    @NotNull(message = "USER_DATE_OF_BIRTH_INVALID")
+    @NotNull(message = "USER_DATE_OF_BIRTH_NOT_NULL")
+    @DateOfBirthConstraint(minAge = 18)
     LocalDate dateOfBirth;
 }

@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
+import vn.van.identity_service.validator.DateOfBirthConstraint;
 
 import java.time.LocalDate;
 
@@ -19,6 +20,7 @@ public class UserUpdateRequest {
     @NotNull(message = "USER_LAST_NAME_NOT_NULL")
     String lastName;
 
-    @NotNull(message = "USER_DATE_OF_BIRTH_INVALID")
+    @NotNull(message = "USER_DATE_OF_BIRTH_NOT_NULL")
+    @DateOfBirthConstraint(minAge = 18)
     LocalDate dateOfBirth;
 }

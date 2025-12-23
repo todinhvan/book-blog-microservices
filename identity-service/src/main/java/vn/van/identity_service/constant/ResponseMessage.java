@@ -21,7 +21,9 @@ public enum ResponseMessage {
     USER_LAST_NAME_NOT_NULL("User: Last name is require"),
     USER_EMAIL_INVALID("User: Email is invalid"),
     USER_PASSWORD_INVALID("User: Password must be greater than or equals to 4 characters"),
-    USER_DATE_OF_BIRTH_INVALID("User: Date of birth is invalid format (YYYY-MM-DD)")
+    USER_DATE_OF_BIRTH_NOT_NULL("User: Date of birth is require (YYYY-MM-DD)"),
+    USER_DATE_OF_BIRTH_INVALID("User: Date of birth must be greater than or equals {minAge} years old")
+
     ;
 
     private final int statusCode;

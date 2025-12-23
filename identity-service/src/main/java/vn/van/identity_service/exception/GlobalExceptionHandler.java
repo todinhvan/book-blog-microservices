@@ -1,5 +1,6 @@
 package vn.van.identity_service.exception;
 
+import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -8,6 +9,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.dto.response.ApiResponse;
 
+import java.util.Map;
+import java.util.Objects;
+
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
@@ -15,7 +19,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleException(Exception e) {
         log.error(e.toString());
         ResponseMessage responseMessage = ResponseMessage.INTERNAL_SERVER_ERROR;
-        ApiResponse<?> response = toApiResponse(responseMessage);
+        ApiResponse<?> response = toApiResponse(responseMessage, null);
         return new ResponseEntity<>(response, responseMessage.getStatus());
     }
 
@@ -23,7 +27,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleApplicationException(ApplicationException e) {
         log.error(e.toString());
         ResponseMessage responseMessage = e.getResponseMessage();
-        ApiResponse<?> response = toApiResponse(responseMessage);
+        ApiResponse<?> response = toApiResponse(responseMessage, null);
         return new ResponseEntity<>(response, responseMessage.getStatus());
     }
 
@@ -31,20 +35,31 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<?>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         log.error(e.toString());
         ResponseMessage responseMessage = ResponseMessage.INVALID_KEY_RESPONSE_MESSAGE;
+        String message = responseMessage.getMessage();
+
         try {
             responseMessage = ResponseMessage.valueOf(e.getFieldError().getDefaultMessage());
+            var violation = e.getBindingResult().getAllErrors().getFirst().unwrap(ConstraintViolation.class);
+            var attributes = violation.getConstraintDescriptor().getAttributes();
+            message = mapCustomMessage(responseMessage.getMessage(), attributes);
         } catch (IllegalArgumentException ex) {}
 
 
-        ApiResponse<?> response = toApiResponse(responseMessage);
+        ApiResponse<?> response = toApiResponse(responseMessage, message);
         return new ResponseEntity<>(response, responseMessage.getStatus());
     }
 
-    private <T> ApiResponse<T> toApiResponse(ResponseMessage responseMessage) {
+    private <T> ApiResponse<T> toApiResponse(ResponseMessage responseMessage, String customMessage) {
         return ApiResponse.<T>builder()
                 .statusCode(responseMessage.getStatusCode())
                 .status(responseMessage.getStatus())
-                .message(responseMessage.getMessage())
+                .message(Objects.isNull(customMessage) ? responseMessage.getMessage() : customMessage)
                 .build();
+    }
+
+    private String mapCustomMessage(String message, Map<String, Object> attributes) {
+        return attributes.containsKey("minAge")
+                ? message.replace("{minAge}", attributes.get("minAge").toString())
+                : message;
     }
 }
