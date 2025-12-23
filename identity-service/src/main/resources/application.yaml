@@ -22,11 +22,13 @@ server:
 app:
   config:
     jwt-secret: ${APP_CONFIG_JWT_SECRET}
-    token-expire-time: 5 # 5 second
-    refresh-token-expire-time: 240 # 240 second
+    token-expire-time: 60 # 60 minutes
+    refresh-token-expire-time: 1440 # 1440 minutes
   default:
     user:
       email: ${APP_DEFAULT_USER_EMAIL}
       password: ${APP_DEFAULT_USER_PASSWORD}
     cron:
       clean-blacklist-token-expired: "0 0 0 * * *"
+  services:
+    profile: http://localhost:9002/profiles

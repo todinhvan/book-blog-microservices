@@ -130,7 +130,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         JWSVerifier verifier = new MACVerifier(jwtSecret.getBytes());
         Date expirationTime = isRefresh
                 ? new Date(signedJWT.getJWTClaimsSet().getIssueTime()
-                    .toInstant().plus(refreshTokenExpireTime, ChronoUnit.SECONDS).toEpochMilli())
+                    .toInstant().plus(refreshTokenExpireTime, ChronoUnit.MINUTES).toEpochMilli())
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
         String jwtId = signedJWT.getJWTClaimsSet().getJWTID();
 
@@ -151,7 +151,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .subject(user.getEmail())
                 .issuer("van.vn")
                 .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(tokenExpireTime, ChronoUnit.SECONDS).toEpochMilli()))
+                .expirationTime(new Date(Instant.now().plus(tokenExpireTime, ChronoUnit.MINUTES).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
                 .claim("user-id", user.getId())

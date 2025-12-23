@@ -12,14 +12,17 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.constant.RoleType;
+import vn.van.identity_service.dto.request.ProfileCreateRequest;
 import vn.van.identity_service.dto.request.UserCreateRequest;
 import vn.van.identity_service.dto.request.UserUpdateRequest;
 import vn.van.identity_service.dto.response.UserResponse;
 import vn.van.identity_service.entity.User;
 import vn.van.identity_service.exception.ApplicationException;
+import vn.van.identity_service.mapper.ProfileMapper;
 import vn.van.identity_service.mapper.UserMapper;
 import vn.van.identity_service.repository.RoleRepository;
 import vn.van.identity_service.repository.UserRepository;
+import vn.van.identity_service.repository.http_client.ProfileClient;
 import vn.van.identity_service.service.UserService;
 
 import java.util.List;
@@ -32,7 +35,9 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     RoleRepository roleRepository;
+    ProfileClient profileClient;
     UserMapper userMapper;
+    ProfileMapper profileMapper;
     PasswordEncoder passwordEncoder;
 
     @Override
@@ -47,6 +52,12 @@ public class UserServiceImpl implements UserService {
         user.setRoles(Set.of(roleRepository.findById(RoleType.USER.name())
                 .orElseThrow(() -> new ApplicationException(ResponseMessage.ROLE_NOT_FOUND))));
         userRepository.save(user);
+
+        ProfileCreateRequest profileCreateRequest = profileMapper.toProfileCreateRequest(user);
+        profileCreateRequest.setUserId(user.getId());
+        var result = profileClient.createProfile(profileCreateRequest);
+        log.info(result.toString());
+
         return userMapper.toUserResponse(user);
     }
 
