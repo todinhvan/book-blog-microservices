@@ -1,9 +1,12 @@
 package vn.van.identity_service.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.dto.request.UserCreateRequest;
 import vn.van.identity_service.dto.request.UserUpdateRequest;
+import vn.van.identity_service.dto.response.ApiResponse;
 import vn.van.identity_service.dto.response.UserResponse;
 import vn.van.identity_service.service.UserService;
 
@@ -16,27 +19,42 @@ public class UserController {
     private UserService userService;
 
     @PostMapping
-    public UserResponse createUser(@RequestBody UserCreateRequest request) {
-        return userService.createUser(request);
+    public ResponseEntity<ApiResponse<UserResponse>> createUser(@RequestBody UserCreateRequest request) {
+        return ResponseEntity
+                .ok(toApiResponse(ResponseMessage.USER_CREATED, userService.createUser(request)));
     }
 
     @GetMapping("/{userId}")
-    public UserResponse  getUser(@PathVariable String userId) {
-        return userService.getUser(userId);
+    public ResponseEntity<ApiResponse<UserResponse>> getUser(@PathVariable String userId) {
+        return ResponseEntity
+                .ok(toApiResponse(ResponseMessage.USER_GET, userService.getUser(userId)));
     }
 
     @GetMapping
-    public List<UserResponse> getUsers() {
-        return userService.getAllUsers();
+    public ResponseEntity<ApiResponse<List<UserResponse>>> getUsers() {
+        return ResponseEntity
+                .ok(toApiResponse(ResponseMessage.USER_GET_ALL, userService.getAllUsers()));
     }
 
     @PutMapping("/{userId}")
-    public UserResponse updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
-        return userService.updateUser(userId, request);
+    public ResponseEntity<ApiResponse<UserResponse>> updateUser(@PathVariable String userId, @RequestBody UserUpdateRequest request) {
+        return ResponseEntity
+                .ok(toApiResponse(ResponseMessage.USER_UPDATED, userService.updateUser(userId, request)));
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable String userId) {
+    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
+        return ResponseEntity
+                .ok(toApiResponse(ResponseMessage.USER_DELETED, null));
+    }
+
+    private <T> ApiResponse<T> toApiResponse(ResponseMessage responseMessage, T data) {
+        ApiResponse<T> response = new ApiResponse<>();
+        response.setStatusCode(responseMessage.getStatusCode());
+        response.setStatus(responseMessage.getStatus());
+        response.setMessage(responseMessage.getMessage());
+        response.setData(data);
+        return response;
     }
 }

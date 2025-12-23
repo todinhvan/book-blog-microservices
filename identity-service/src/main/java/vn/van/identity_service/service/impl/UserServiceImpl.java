@@ -2,10 +2,12 @@ package vn.van.identity_service.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.dto.request.UserCreateRequest;
 import vn.van.identity_service.dto.request.UserUpdateRequest;
 import vn.van.identity_service.dto.response.UserResponse;
 import vn.van.identity_service.entity.User;
+import vn.van.identity_service.exception.ApplicationException;
 import vn.van.identity_service.repository.UserRepository;
 import vn.van.identity_service.service.UserService;
 
@@ -19,7 +21,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse createUser(UserCreateRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+            throw new ApplicationException(ResponseMessage.USER_EXISTED);
         }
 
         User user = new User();
@@ -35,7 +37,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponse getUser(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ApplicationException(ResponseMessage.USER_NOT_FOUND));
         return toUserResponse(user);
     }
 
@@ -72,6 +74,6 @@ public class UserServiceImpl implements UserService {
 
     private User existsUser(String userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ApplicationException(ResponseMessage.USER_NOT_FOUND));
     }
 }
