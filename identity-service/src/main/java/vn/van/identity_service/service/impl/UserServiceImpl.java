@@ -3,7 +3,7 @@ package vn.van.identity_service.service.impl;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.dto.request.UserCreateRequest;
@@ -23,6 +23,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
     UserRepository userRepository;
     UserMapper userMapper;
+    PasswordEncoder passwordEncoder;
 
     @Override
     public UserResponse createUser(UserCreateRequest request) {
@@ -30,6 +31,7 @@ public class UserServiceImpl implements UserService {
             throw new ApplicationException(ResponseMessage.USER_EXISTED);
         }
 
+        request.setPassword(passwordEncoder.encode(request.getPassword()));
         User user = userMapper.toUser(request);
         userRepository.save(user);
         return userMapper.toUserResponse(user);
