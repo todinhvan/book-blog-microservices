@@ -29,7 +29,7 @@ public class PermissionServiceImpl implements PermissionService {
         }
 
         Permission permission = permissionMapper.toPermission(request);
-        permissionRepository.save(permission);
+        permission = permissionRepository.save(permission);
         return permissionMapper.toPermissionResponse(permission);
     }
 

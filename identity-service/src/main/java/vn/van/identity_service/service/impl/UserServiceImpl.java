@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toUser(request);
         user.setRoles(Set.of(roleRepository.findById(RoleType.USER.name())
                 .orElseThrow(() -> new ApplicationException(ResponseMessage.ROLE_NOT_FOUND))));
-        userRepository.save(user);
+        user = userRepository.save(user);
 
         ProfileCreateRequest profileCreateRequest = profileMapper.toProfileCreateRequest(user);
         profileCreateRequest.setUserId(user.getId());
@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
         User user = existsUser(userId);
         userMapper.updateUser(user, request);
-        userRepository.save(user);
+        user = userRepository.save(user);
         return userMapper.toUserResponse(user);
     }
 

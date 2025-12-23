@@ -3,6 +3,7 @@ package vn.van.identity_service.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +29,11 @@ public class DefaultConfiguration {
     private String userPassword;
 
     @Bean
+    @ConditionalOnProperty(
+            prefix = "spring",
+            value = "datasource.driver-class-name",
+            havingValue = "com.mysql.cj.jdbc.Driver"
+    )
     public ApplicationRunner applicationRunner() {
         return args -> {
             Role adminRole = roleRepository.findById(RoleType.ADMIN.name())

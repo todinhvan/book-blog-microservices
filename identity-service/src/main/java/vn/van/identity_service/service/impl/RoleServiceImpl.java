@@ -35,7 +35,7 @@ public class RoleServiceImpl implements RoleService {
 
         Role role = roleMapper.toRole(request);
         role.setPermissions(new HashSet<>(permissionRepository.findAllById(request.getPermissions())));
-        roleRepository.save(role);
+        role = roleRepository.save(role);
         return roleMapper.toRoleResponse(role);
     }
 
@@ -49,7 +49,7 @@ public class RoleServiceImpl implements RoleService {
         Role role = existsRole(roleId);
         roleMapper.updateRole(role, request);
         role.setPermissions(new HashSet<>(permissionRepository.findAllById(request.getPermissions())));
-        roleRepository.save(role);
+        role = roleRepository.save(role);
         return roleMapper.toRoleResponse(role);
     }
 
