@@ -21,13 +21,13 @@ server:
 
 app:
   config:
-    jwt-secret: ${APP_CONFIG_JWT_SECRET}
+    jwt-secret: ${APP_CONFIG_JWT_SECRET:e485b5240ec08b54456b810ec95b5c47b9baf0878bd9e5121a4d09aeba978aa9}
     token-expire-time: 60 # 60 minutes
     refresh-token-expire-time: 1440 # 1440 minutes
   default:
     user:
-      email: ${APP_DEFAULT_USER_EMAIL}
-      password: ${APP_DEFAULT_USER_PASSWORD}
+      email: ${APP_DEFAULT_USER_EMAIL:admin@gmail.com}
+      password: ${APP_DEFAULT_USER_PASSWORD:1234}
     cron:
       clean-blacklist-token-expired: "0 0 0 * * *"
   services:

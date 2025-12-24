@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: ${DBMS_CONNECTION}
+    username: ${DBMS_USERNAME}
+    password: ${DBMS_PASSWORD}
+
+app:
+  config:
+    jwt-secret: ${JWT_SECRET}
+    token-expire-time: 30 # 30 minutes
+    refresh-token-expire-time: 720 # 720 minutes
+  default:
+    user:
+      email: ${DEFAULT_USER_EMAIL}
+      password: ${DEFAULT_USER_PASSWORD}
