@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -124,9 +125,11 @@ public class UserServiceTest {
     }
 
     @Test
-    public void createUser_fail_with_userNotFound() {
+    public void createUser_fail_with_userExisted() {
         // Given
-        Mockito.when(userRepository.existsByEmail(Mockito.anyString())).thenReturn(true);
+        Mockito.when(roleRepository.findById(Mockito.anyString())).thenReturn(Optional.of(role));
+        Mockito.when(userRepository.save(Mockito.any()))
+                .thenThrow(new DataIntegrityViolationException("User already exists"));
 
         // When
         ApplicationException e = assertThrows(ApplicationException.class, () -> userService.createUser(request));
