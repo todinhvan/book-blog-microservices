@@ -1,11 +1,11 @@
 package vn.van.identity_service.dto.response;
 
+import java.util.Set;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Set;
 
 @Getter
 @Setter

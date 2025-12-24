@@ -1,7 +1,8 @@
 package vn.van.identity_service.constant;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
+
+import lombok.Getter;
 
 @Getter
 public enum ResponseMessage {
@@ -43,8 +44,7 @@ public enum ResponseMessage {
     USER_PASSWORD_INVALID("User: Password must be greater than or equals to 4 characters"),
     USER_DATE_OF_BIRTH_NOT_NULL("User: Date of birth is require (YYYY-MM-DD)"),
     USER_DATE_OF_BIRTH_INVALID("User: Date of birth must be greater than or equals {minAge} years old"),
-    USER_CITY_NOT_NULL("User: City is require")
-    ;
+    USER_CITY_NOT_NULL("User: City is require");
 
     private final int statusCode;
     private final HttpStatus status;

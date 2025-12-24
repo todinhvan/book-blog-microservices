@@ -1,17 +1,19 @@
 package vn.van.identity_service.exception;
 
+import java.util.Map;
+import java.util.Objects;
+
 import jakarta.validation.ConstraintViolation;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import lombok.extern.slf4j.Slf4j;
 import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.dto.response.ApiResponse;
-
-import java.util.Map;
-import java.util.Objects;
 
 @RestControllerAdvice
 @Slf4j
@@ -43,8 +45,8 @@ public class GlobalExceptionHandler {
             var violation = e.getBindingResult().getAllErrors().getFirst().unwrap(ConstraintViolation.class);
             var attributes = violation.getConstraintDescriptor().getAttributes();
             message = mapCustomMessage(responseMessage.getMessage(), attributes);
-        } catch (IllegalArgumentException ex) {}
-
+        } catch (IllegalArgumentException ex) {
+        }
 
         ApiResponse<?> response = toApiResponse(responseMessage, message);
         return new ResponseEntity<>(response, responseMessage.getStatus());

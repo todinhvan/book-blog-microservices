@@ -1,8 +1,7 @@
 package vn.van.identity_service.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -17,13 +16,15 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.dto.request.UserCreateRequest;
 import vn.van.identity_service.dto.response.UserResponse;
 import vn.van.identity_service.exception.ApplicationException;
 import vn.van.identity_service.service.UserService;
-
-import java.time.LocalDate;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -77,9 +78,9 @@ public class UserControllerTest {
 
         // When
         mockMvc.perform(MockMvcRequestBuilders.post("/users")
-                    .contentType(MediaType.APPLICATION_JSON_VALUE)
-                    .content(content))
-        // Then
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(content))
+                // Then
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("statusCode").value(HttpStatus.CREATED.value()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data.id").value(userId));
@@ -99,7 +100,7 @@ public class UserControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/users")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content(content))
-        // Then
+                // Then
                 .andExpect(MockMvcResultMatchers.status().isConflict())
                 .andExpect(MockMvcResultMatchers.jsonPath("statusCode").value(HttpStatus.CONFLICT.value()))
                 .andExpect(MockMvcResultMatchers.jsonPath("message").value("User already exists"));
@@ -121,6 +122,7 @@ public class UserControllerTest {
                 // Then
                 .andExpect(MockMvcResultMatchers.status().isUnprocessableEntity())
                 .andExpect(MockMvcResultMatchers.jsonPath("statusCode").value(HttpStatus.UNPROCESSABLE_ENTITY.value()))
-                .andExpect(MockMvcResultMatchers.jsonPath("message").value("User: Password must be greater than or equals to 4 characters"));
+                .andExpect(MockMvcResultMatchers.jsonPath("message")
+                        .value("User: Password must be greater than or equals to 4 characters"));
     }
 }

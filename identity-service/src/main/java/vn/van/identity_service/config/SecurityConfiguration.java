@@ -1,6 +1,8 @@
 package vn.van.identity_service.config;
 
-import lombok.RequiredArgsConstructor;
+import java.time.Duration;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +22,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 
-import javax.crypto.spec.SecretKeySpec;
-import java.time.Duration;
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -42,15 +43,17 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable);
 
         // config permit requests
-        http.authorizeHttpRequests(request ->
-                request.requestMatchers(HttpMethod.POST, AUTH_WHITELIST).permitAll().anyRequest().authenticated());
+        http.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, AUTH_WHITELIST)
+                .permitAll()
+                .anyRequest()
+                .authenticated());
 
         // config verify jwt for requests
         http.oauth2ResourceServer(oauth2 -> {
             oauth2.jwt(jwtConfigurer -> jwtConfigurer
-                    .decoder(jwtDecoder())
-                    .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                  .authenticationEntryPoint(new JwtAuthenticationEntryPoint());
+                            .decoder(jwtDecoder())
+                            .jwtAuthenticationConverter(jwtAuthenticationConverter()))
+                    .authenticationEntryPoint(new JwtAuthenticationEntryPoint());
         });
 
         return http.build();
@@ -59,15 +62,14 @@ public class SecurityConfiguration {
     @Bean
     JwtDecoder jwtDecoder() {
         SecretKeySpec secretKeySpec = new SecretKeySpec(jwtSecret.getBytes(), "HS512");
-        NimbusJwtDecoder decoder = NimbusJwtDecoder
-                .withSecretKey(secretKeySpec)
+        NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(secretKeySpec)
                 .macAlgorithm(MacAlgorithm.HS512)
                 .build();
 
         OAuth2TokenValidator<Jwt> validator = new DelegatingOAuth2TokenValidator<>(
-                new JwtTimestampValidator(Duration.ofSeconds(5)), // permit valid token plus 5s, if not set then default 60s
-                blacklistTokenValidator
-        );
+                new JwtTimestampValidator(
+                        Duration.ofSeconds(5)), // permit valid token plus 5s, if not set then default 60s
+                blacklistTokenValidator);
         decoder.setJwtValidator(validator);
         return decoder;
     }

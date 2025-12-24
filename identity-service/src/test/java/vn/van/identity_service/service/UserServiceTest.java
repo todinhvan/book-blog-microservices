@@ -1,6 +1,11 @@
 package vn.van.identity_service.service;
 
-import lombok.extern.slf4j.Slf4j;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +19,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+
+import lombok.extern.slf4j.Slf4j;
 import vn.van.identity_service.dto.request.UserCreateRequest;
 import vn.van.identity_service.dto.response.ProfileResponse;
 import vn.van.identity_service.dto.response.UserResponse;
@@ -23,12 +30,6 @@ import vn.van.identity_service.exception.ApplicationException;
 import vn.van.identity_service.repository.RoleRepository;
 import vn.van.identity_service.repository.UserRepository;
 import vn.van.identity_service.repository.http_client.ProfileClient;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestPropertySource("/test.properties")
@@ -91,12 +92,12 @@ public class UserServiceTest {
         responseProfile.setLastName(lastName);
         responseProfile.setDateOfBirth(dateOfBirth);
         responseProfile.setCity(city);
-
     }
 
     @BeforeEach
     void setupSecurityContext() {
-        var auth = new UsernamePasswordAuthenticationToken(email, password, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
+        var auth = new UsernamePasswordAuthenticationToken(
+                email, password, List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 

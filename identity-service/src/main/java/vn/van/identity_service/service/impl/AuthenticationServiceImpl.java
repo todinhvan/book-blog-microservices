@@ -1,19 +1,28 @@
 package vn.van.identity_service.service.impl;
 
+import java.text.ParseException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+import java.util.StringJoiner;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.dto.request.AuthenticationRequest;
 import vn.van.identity_service.dto.request.LoginRequest;
@@ -25,14 +34,6 @@ import vn.van.identity_service.exception.ApplicationException;
 import vn.van.identity_service.repository.BlacklistTokenRepository;
 import vn.van.identity_service.repository.UserRepository;
 import vn.van.identity_service.service.AuthenticationService;
-
-import java.text.ParseException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.Objects;
-import java.util.StringJoiner;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +58,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository
+                .findByEmail(request.getEmail())
                 .orElseThrow(() -> new ApplicationException(ResponseMessage.LOGIN_FAILURE));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -75,8 +77,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             SignedJWT signedJWT = verifyToken(request.getToken(), true);
             saveBlacklistToken(
                     signedJWT.getJWTClaimsSet().getJWTID(),
-                    signedJWT.getJWTClaimsSet().getExpirationTime()
-            );
+                    signedJWT.getJWTClaimsSet().getExpirationTime());
         } catch (ParseException | JOSEException | ApplicationException e) {
             log.error(e.toString());
             log.warn("Force Logout");
@@ -104,10 +105,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             SignedJWT signedJWT = verifyToken(request.getToken(), true);
             saveBlacklistToken(
                     signedJWT.getJWTClaimsSet().getJWTID(),
-                    signedJWT.getJWTClaimsSet().getExpirationTime()
-            );
+                    signedJWT.getJWTClaimsSet().getExpirationTime());
 
-            User user = userRepository.findByEmail(signedJWT.getJWTClaimsSet().getSubject())
+            User user = userRepository
+                    .findByEmail(signedJWT.getJWTClaimsSet().getSubject())
                     .orElseThrow(() -> new ApplicationException(ResponseMessage.USER_NOT_FOUND));
             AuthenticationResponse response = new AuthenticationResponse();
             response.setToken(generateToken(user));
@@ -129,8 +130,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         SignedJWT signedJWT = SignedJWT.parse(token);
         JWSVerifier verifier = new MACVerifier(jwtSecret.getBytes());
         Date expirationTime = isRefresh
-                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime()
-                    .toInstant().plus(refreshTokenExpireTime, ChronoUnit.MINUTES).toEpochMilli())
+                ? new Date(signedJWT
+                        .getJWTClaimsSet()
+                        .getIssueTime()
+                        .toInstant()
+                        .plus(refreshTokenExpireTime, ChronoUnit.MINUTES)
+                        .toEpochMilli())
                 : signedJWT.getJWTClaimsSet().getExpirationTime();
         String jwtId = signedJWT.getJWTClaimsSet().getJWTID();
 
@@ -151,7 +156,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .subject(user.getEmail())
                 .issuer("van.vn")
                 .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(tokenExpireTime, ChronoUnit.MINUTES).toEpochMilli()))
+                .expirationTime(new Date(
+                        Instant.now().plus(tokenExpireTime, ChronoUnit.MINUTES).toEpochMilli()))
                 .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
                 .claim("user-id", user.getId())
@@ -173,9 +179,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             user.getRoles().forEach(role -> {
                 sj.add("ROLE_" + role.getName());
                 if (!CollectionUtils.isEmpty(role.getPermissions())) {
-                    role.getPermissions().forEach(permission -> {
-                        sj.add(permission.getName());
-                    });
+                    role.getPermissions().forEach(permission -> sj.add(permission.getName()));
                 }
             });
         }

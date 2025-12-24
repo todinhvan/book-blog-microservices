@@ -1,12 +1,13 @@
 package vn.van.identity_service.cronjob;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Date;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import vn.van.identity_service.repository.BlacklistTokenRepository;
 
-import java.util.Date;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import vn.van.identity_service.repository.BlacklistTokenRepository;
 
 @Component
 @RequiredArgsConstructor

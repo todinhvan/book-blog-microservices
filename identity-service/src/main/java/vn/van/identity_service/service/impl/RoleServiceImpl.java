@@ -1,23 +1,23 @@
 package vn.van.identity_service.service.impl;
 
+import java.util.HashSet;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.stereotype.Service;
 import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.dto.request.RoleCreateRequest;
 import vn.van.identity_service.dto.request.RoleUpdateRequest;
 import vn.van.identity_service.dto.response.RoleResponse;
-import vn.van.identity_service.entity.Permission;
 import vn.van.identity_service.entity.Role;
 import vn.van.identity_service.exception.ApplicationException;
 import vn.van.identity_service.mapper.RoleMapper;
 import vn.van.identity_service.repository.PermissionRepository;
 import vn.van.identity_service.repository.RoleRepository;
 import vn.van.identity_service.service.RoleService;
-
-import java.util.HashSet;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -60,6 +60,8 @@ public class RoleServiceImpl implements RoleService {
     }
 
     private Role existsRole(String roleId) {
-        return roleRepository.findById(roleId).orElseThrow(() -> new ApplicationException(ResponseMessage.ROLE_NOT_FOUND));
+        return roleRepository
+                .findById(roleId)
+                .orElseThrow(() -> new ApplicationException(ResponseMessage.ROLE_NOT_FOUND));
     }
 }

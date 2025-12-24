@@ -1,7 +1,9 @@
 package vn.van.identity_service.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
+
+import java.time.LocalDate;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +19,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import vn.van.identity_service.dto.request.UserCreateRequest;
-
-import java.time.LocalDate;
-
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -65,13 +67,10 @@ public class UserControllerIntegrationTest {
 
         // When
         mockMvc.perform(MockMvcRequestBuilders.post("/users")
-                    .with(jwt().authorities(
-                                () -> "ROLE_ADMIN",
-                                () -> "CREATE"
-                    ))
-                    .contentType(MediaType.APPLICATION_JSON_VALUE)
-                    .content(content))
-        // Then
+                        .with(jwt().authorities(() -> "ROLE_ADMIN", () -> "CREATE"))
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(content))
+                // Then
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("statusCode").value(HttpStatus.CREATED.value()));
     }
