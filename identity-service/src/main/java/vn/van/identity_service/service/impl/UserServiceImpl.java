@@ -3,6 +3,7 @@ package vn.van.identity_service.service.impl;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -44,16 +45,17 @@ public class UserServiceImpl implements UserService {
     @Override
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('CREATE')")
     public UserResponse createUser(UserCreateRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new ApplicationException(ResponseMessage.USER_EXISTED);
-        }
-
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         User user = userMapper.toUser(request);
         user.setRoles(Set.of(roleRepository
                 .findById(RoleType.USER.name())
                 .orElseThrow(() -> new ApplicationException(ResponseMessage.ROLE_NOT_FOUND))));
-        user = userRepository.save(user);
+
+        try {
+            user = userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new ApplicationException(ResponseMessage.USER_EXISTED);
+        }
 
         ProfileCreateRequest profileCreateRequest = profileMapper.toProfileCreateRequest(user);
         profileCreateRequest.setUserId(user.getId());
