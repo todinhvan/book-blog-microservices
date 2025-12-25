@@ -3,7 +3,7 @@ spring:
     name: IdentityService
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/identity_data?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/identity_data?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
     username: root
     password: 123
   jpa:
