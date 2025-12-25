@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.dto.request.AuthenticationRequest;
 import vn.van.identity_service.dto.request.LoginRequest;
+import vn.van.identity_service.dto.request.RegisterRequest;
 import vn.van.identity_service.dto.response.ApiResponse;
 import vn.van.identity_service.dto.response.AuthenticationResponse;
 import vn.van.identity_service.dto.response.IntrospectResponse;
@@ -25,6 +26,14 @@ import vn.van.identity_service.service.AuthenticationService;
 @Slf4j
 public class AuthenticationController {
     AuthenticationService authenticationService;
+
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> register(@RequestBody RegisterRequest request) {
+        log.info("register");
+        ApiResponse<AuthenticationResponse> response =
+                toApiResponse(ResponseMessage.REGISTER_SUCCESS, authenticationService.register(request));
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthenticationResponse>> login(@RequestBody LoginRequest request) {

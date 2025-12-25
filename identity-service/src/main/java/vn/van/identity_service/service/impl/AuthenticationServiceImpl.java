@@ -4,10 +4,12 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -24,15 +26,22 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import vn.van.identity_service.constant.ResponseMessage;
+import vn.van.identity_service.constant.RoleType;
 import vn.van.identity_service.dto.request.AuthenticationRequest;
 import vn.van.identity_service.dto.request.LoginRequest;
+import vn.van.identity_service.dto.request.ProfileCreateRequest;
+import vn.van.identity_service.dto.request.RegisterRequest;
 import vn.van.identity_service.dto.response.AuthenticationResponse;
 import vn.van.identity_service.dto.response.IntrospectResponse;
 import vn.van.identity_service.entity.BlacklistToken;
 import vn.van.identity_service.entity.User;
 import vn.van.identity_service.exception.ApplicationException;
+import vn.van.identity_service.mapper.AuthenticationMapper;
+import vn.van.identity_service.mapper.ProfileMapper;
 import vn.van.identity_service.repository.BlacklistTokenRepository;
+import vn.van.identity_service.repository.RoleRepository;
 import vn.van.identity_service.repository.UserRepository;
+import vn.van.identity_service.repository.http_client.ProfileClient;
 import vn.van.identity_service.service.AuthenticationService;
 
 @Service
@@ -41,8 +50,12 @@ import vn.van.identity_service.service.AuthenticationService;
 @Slf4j
 public class AuthenticationServiceImpl implements AuthenticationService {
     UserRepository userRepository;
+    RoleRepository roleRepository;
     BlacklistTokenRepository blacklistTokenRepository;
+    ProfileClient profileClient;
     PasswordEncoder passwordEncoder;
+    AuthenticationMapper authenticationMapper;
+    ProfileMapper profileMapper;
 
     @NonFinal
     @Value("${app.config.jwt-secret}")
@@ -55,6 +68,29 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @NonFinal
     @Value("${app.config.refresh-token-expire-time}")
     long refreshTokenExpireTime;
+
+    @Override
+    public AuthenticationResponse register(RegisterRequest request) {
+        request.setPassword(passwordEncoder.encode(request.getPassword()));
+        User user = authenticationMapper.toUser(request);
+        user.setRoles(Set.of(roleRepository
+                .findById(RoleType.USER.name())
+                .orElseThrow(() -> new ApplicationException(ResponseMessage.ROLE_NOT_FOUND))));
+
+        try {
+            user = userRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new ApplicationException(ResponseMessage.USER_EXISTED);
+        }
+
+        ProfileCreateRequest profileCreateRequest = profileMapper.toProfileCreateRequest(user);
+        profileCreateRequest.setUserId(user.getId());
+        profileClient.createProfile(profileCreateRequest);
+
+        AuthenticationResponse response = new AuthenticationResponse();
+        response.setToken(generateToken(user));
+        return response;
+    }
 
     @Override
     public AuthenticationResponse login(LoginRequest request) {
