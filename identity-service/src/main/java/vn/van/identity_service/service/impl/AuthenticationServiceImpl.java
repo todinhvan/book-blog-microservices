@@ -33,6 +33,7 @@ import vn.van.identity_service.dto.request.ProfileCreateRequest;
 import vn.van.identity_service.dto.request.RegisterRequest;
 import vn.van.identity_service.dto.response.AuthenticationResponse;
 import vn.van.identity_service.dto.response.IntrospectResponse;
+import vn.van.identity_service.dto.response.ProfileResponse;
 import vn.van.identity_service.entity.BlacklistToken;
 import vn.van.identity_service.entity.User;
 import vn.van.identity_service.exception.ApplicationException;
@@ -85,7 +86,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         ProfileCreateRequest profileCreateRequest = profileMapper.toProfileCreateRequest(user);
         profileCreateRequest.setUserId(user.getId());
-        profileClient.createProfile(profileCreateRequest);
+        ProfileResponse profileResponse = profileClient.createDefaultProfile(profileCreateRequest).getData();
+        log.info("User Id of Profile: {}", profileResponse.getUserId());
 
         AuthenticationResponse response = new AuthenticationResponse();
         response.setToken(generateToken(user));

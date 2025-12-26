@@ -22,7 +22,9 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import lombok.extern.slf4j.Slf4j;
+import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.dto.request.UserCreateRequest;
+import vn.van.identity_service.dto.response.ApiResponse;
 import vn.van.identity_service.dto.response.ProfileResponse;
 import vn.van.identity_service.dto.response.UserResponse;
 import vn.van.identity_service.entity.Role;
@@ -113,7 +115,12 @@ public class UserServiceTest {
         Mockito.when(userRepository.existsByEmail(Mockito.anyString())).thenReturn(false);
         Mockito.when(roleRepository.findById(Mockito.anyString())).thenReturn(Optional.of(role));
         Mockito.when(userRepository.save(Mockito.any())).thenReturn(user);
-        Mockito.when(profileClient.createProfile(Mockito.any())).thenReturn(responseProfile);
+        Mockito.when(profileClient.createDefaultProfile(Mockito.any())).thenReturn(ApiResponse.<ProfileResponse>builder()
+                        .statusCode(ResponseMessage.PROFILE_CREATED.getStatusCode())
+                        .status(ResponseMessage.PROFILE_CREATED.getStatus())
+                        .message(ResponseMessage.PROFILE_CREATED.getMessage())
+                        .data(responseProfile)
+                        .build());
 
         // When
         UserResponse userResponse = userService.createUser(request);
