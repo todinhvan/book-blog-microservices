@@ -7,6 +7,7 @@ import lombok.Getter;
 @Getter
 public enum ResponseMessage {
     // Success
+    USER_GET_INFO(HttpStatus.OK, "User Get Info"),
     USER_CREATED(HttpStatus.CREATED, "User Created"),
     USER_GET(HttpStatus.OK, "User Get"),
     USER_GET_ALL(HttpStatus.OK, "User Get All"),

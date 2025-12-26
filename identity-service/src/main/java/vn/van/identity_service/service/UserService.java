@@ -9,6 +9,8 @@ import vn.van.identity_service.dto.response.UserResponse;
 public interface UserService {
     UserResponse createUser(UserCreateRequest request);
 
+    UserResponse getInfo();
+
     UserResponse getUser(String userId);
 
     List<UserResponse> getAllUsers();

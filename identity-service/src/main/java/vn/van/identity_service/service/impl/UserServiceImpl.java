@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -61,6 +62,14 @@ public class UserServiceImpl implements UserService {
         profileCreateRequest.setUserId(user.getId());
         profileClient.createDefaultProfile(profileCreateRequest);
 
+        return userMapper.toUserResponse(user);
+    }
+
+    @Override
+    @PostAuthorize("returnObject.email == authentication.name")
+    public UserResponse getInfo() {
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = existsUser(jwt.getClaimAsString("user-id"));
         return userMapper.toUserResponse(user);
     }
 

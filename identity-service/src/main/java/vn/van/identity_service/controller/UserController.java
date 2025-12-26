@@ -32,6 +32,12 @@ public class UserController {
         return ResponseEntity.ok(toApiResponse(ResponseMessage.USER_CREATED, userService.createUser(request)));
     }
 
+    @GetMapping("info")
+    public ResponseEntity<ApiResponse<UserResponse>> getInfo() {
+        log.info("getInfo");
+        return ResponseEntity.ok(toApiResponse(ResponseMessage.USER_GET_INFO, userService.getInfo()));
+    }
+
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<UserResponse>> getUser(@PathVariable String userId) {
         log.info("getUser");
