@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 public enum ResponseMessage {
     // Success
-
+    SEND_MAIL_SUCCESS(HttpStatus.CREATED, "Send mail successfully"),
     // Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"),
     INVALID_KEY_RESPONSE_MESSAGE(HttpStatus.BAD_REQUEST, "Invalid Key Response"),

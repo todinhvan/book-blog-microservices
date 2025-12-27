@@ -9,3 +9,10 @@ server:
   port: 9003
   servlet:
     context-path: /notification
+
+app:
+  config:
+    mail:
+      api-key: ${BREVO_EMAIL_KEY}
+      sender-email: ${BREVO_SENDER_EMAIL:todinhvan2608@gmail.com}
+      sender-name: ${BREVO_SENDER_NAME:Van}
