@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: NotificationService
+  data:
+    mongodb:
+      uri: ${DB_URI_CONNECTION:mongodb://root:root@localhost:27017/notification-service-data?authSource=admin}
+
+server:
+  port: 9003
+  servlet:
+    context-path: /notification
