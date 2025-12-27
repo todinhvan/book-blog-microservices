@@ -10,6 +10,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -27,6 +28,7 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.constant.RoleType;
+import vn.van.identity_service.dto.event.NotificationEvent;
 import vn.van.identity_service.dto.request.AuthenticationRequest;
 import vn.van.identity_service.dto.request.LoginRequest;
 import vn.van.identity_service.dto.request.ProfileCreateRequest;
@@ -57,6 +59,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     PasswordEncoder passwordEncoder;
     AuthenticationMapper authenticationMapper;
     ProfileMapper profileMapper;
+    KafkaTemplate<String, Object> kafkaTemplate;
 
     @NonFinal
     @Value("${app.config.jwt-secret}")
@@ -88,6 +91,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         profileCreateRequest.setUserId(user.getId());
         ProfileResponse profileResponse = profileClient.createDefaultProfile(profileCreateRequest).getData();
         log.info("User Id of Profile: {}", profileResponse.getUserId());
+
+        kafkaTemplate.send("user-created", NotificationEvent.builder()
+                .channel("email")
+                .recipient(user.getEmail())
+                .build());
 
         AuthenticationResponse response = new AuthenticationResponse();
         response.setToken(generateToken(user));
