@@ -11,6 +11,8 @@ public enum ResponseMessage {
     // Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"),
     INVALID_KEY_RESPONSE_MESSAGE(HttpStatus.BAD_REQUEST, "Invalid Key Response"),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Unauthorized"),
+    FORBIDDEN(HttpStatus.FORBIDDEN, "Forbidden")
     // Error field
 
     ;
