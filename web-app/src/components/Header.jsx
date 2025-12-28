@@ -12,6 +12,7 @@ import MailIcon from "@mui/icons-material/Mail";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import { logOut } from "../services/authenticationService";
+import { useNavigate } from "react-router-dom";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -54,6 +55,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 }));
 
 export default function Header() {
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
 
@@ -69,6 +71,7 @@ export default function Header() {
   };
 
   const handleMenuClose = () => {
+    
     setAnchorEl(null);
     handleMobileMenuClose();
   };
@@ -82,6 +85,10 @@ export default function Header() {
     logOut();
     window.location.href = "/login";
   };
+
+  const handleOpenProfile = () => {
+    navigate("/profile");
+  }
 
   const menuId = "primary-search-account-menu";
   const renderMenu = (
@@ -100,7 +107,7 @@ export default function Header() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      <MenuItem onClick={handleMenuClose}>Profile</MenuItem>
+      <MenuItem onClick={handleOpenProfile}>Profile</MenuItem>
       <MenuItem onClick={handleMenuClose}>Settings</MenuItem>
       <MenuItem onClick={handleLogout}>Log Out</MenuItem>
     </Menu>

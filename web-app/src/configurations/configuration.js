@@ -5,4 +5,5 @@ export const CONFIG = {
 export const API = {
   LOGIN: "/identity/auth/login",
   MY_INFO: "/identity/users/info",
+  MY_POST: "/posts"
 };

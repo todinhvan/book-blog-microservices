@@ -9,14 +9,17 @@ import Toolbar from "@mui/material/Toolbar";
 import HomeIcon from "@mui/icons-material/Home";
 import PeopleIcon from "@mui/icons-material/People";
 import GroupsIcon from "@mui/icons-material/Groups";
+import { useNavigate } from "react-router-dom";
 
 function SideMenu() {
+  const navigate = useNavigate()
+
   return (
     <>
       <Toolbar />
       <List>
         <ListItem key={"home"} disablePadding>
-          <ListItemButton>
+          <ListItemButton onClick={() => navigate("/")}>
             <ListItemIcon>
               <HomeIcon />
             </ListItemIcon>
