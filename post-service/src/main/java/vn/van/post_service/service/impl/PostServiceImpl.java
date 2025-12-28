@@ -17,6 +17,7 @@ import vn.van.post_service.entity.Post;
 import vn.van.post_service.mapper.PostMapper;
 import vn.van.post_service.repository.PostRepository;
 import vn.van.post_service.service.PostService;
+import vn.van.post_service.util.DateTimeFormatter;
 
 import java.time.Instant;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.List;
 public class PostServiceImpl implements PostService {
     PostRepository postRepository;
     PostMapper postMapper;
+    DateTimeFormatter formatter;
 
     @Override
     public PostResponse createPost(PostCreateRequest request) {
@@ -48,13 +50,19 @@ public class PostServiceImpl implements PostService {
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
         Page<Post> pagePost = postRepository.findAllByUserId(extractUserId(), pageable);
+        List<PostResponse> posts = pagePost.getContent().stream()
+                .map(post -> {
+                    PostResponse postResponse = postMapper.toPostResponse(post);
+                    postResponse.setCreated(formatter.format(post.getCreatedAt()));
+                    return postResponse;
+                }).toList();
 
         return PageResponse.<PostResponse>builder()
                 .currentPage(page)
                 .pageSize(size)
                 .totalElements(pagePost.getTotalElements())
                 .totalPages(pagePost.getTotalPages())
-                .data(pagePost.getContent().stream().map(postMapper::toPostResponse).toList())
+                .data(posts)
                 .build();
     }
 
