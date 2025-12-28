@@ -4,10 +4,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestBody;
+import vn.van.profile_service.constant.ResponseMessage;
 import vn.van.profile_service.dto.request.ProfileCreateRequest;
 import vn.van.profile_service.dto.response.ProfileResponse;
 import vn.van.profile_service.entity.Profile;
+import vn.van.profile_service.exception.ApplicationException;
 import vn.van.profile_service.mapper.ProfileMapper;
 import vn.van.profile_service.repository.ProfileRepository;
 
@@ -18,8 +19,14 @@ public class InternalProfileService {
     ProfileRepository profileRepository;
     ProfileMapper profileMapper;
 
-    public ProfileResponse createDefault(@RequestBody ProfileCreateRequest request) {
+    public ProfileResponse createDefault(ProfileCreateRequest request) {
         Profile profile = profileMapper.toProfile(request);
         return profileMapper.toProfileResponse(profileRepository.save(profile));
+    }
+
+    public ProfileResponse getProfile(String userId) {
+        Profile profile = profileRepository.findByUserId(userId)
+                .orElseThrow(() -> new ApplicationException(ResponseMessage.USER_NOT_FOUND));
+        return profileMapper.toProfileResponse(profile);
     }
 }

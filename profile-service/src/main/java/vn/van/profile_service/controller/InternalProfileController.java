@@ -5,10 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import vn.van.profile_service.constant.ResponseMessage;
 import vn.van.profile_service.dto.request.ProfileCreateRequest;
 import vn.van.profile_service.dto.response.ApiResponse;
@@ -25,11 +22,20 @@ public class InternalProfileController {
 
     @PostMapping("create")
     public ResponseEntity<ApiResponse<ProfileResponse>> createDefaultProfile(@RequestBody ProfileCreateRequest request) {
-        return ResponseEntity.ok(ApiResponse.<ProfileResponse>builder()
-                        .statusCode(ResponseMessage.PROFILE_CREATED.getStatusCode())
-                        .status(ResponseMessage.PROFILE_CREATED.getStatus())
-                        .message(ResponseMessage.PROFILE_CREATED.getMessage())
-                        .data(profileService.createDefault(request))
-                        .build());
+        return ResponseEntity.ok(toApiResponse(ResponseMessage.PROFILE_CREATED, profileService.createDefault(request)));
+    }
+
+    @GetMapping("info/{userId}")
+    public ResponseEntity<ApiResponse<ProfileResponse>> getProfile(@PathVariable String userId) {
+        return ResponseEntity.ok(toApiResponse(ResponseMessage.PROFILE_GET, profileService.getProfile(userId)));
+    }
+
+    private <T> ApiResponse<T> toApiResponse(ResponseMessage responseMessage, T data) {
+        return ApiResponse.<T>builder()
+                .statusCode(responseMessage.getStatusCode())
+                .status(responseMessage.getStatus())
+                .message(responseMessage.getMessage())
+                .data(data)
+                .build();
     }
 }
