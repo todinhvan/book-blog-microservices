@@ -1,0 +1,38 @@
+package vn.van.post_service.constant;
+
+import org.springframework.http.HttpStatus;
+
+import lombok.Getter;
+
+@Getter
+public enum ResponseMessage {
+    // Success
+    POST_CREATED(HttpStatus.CREATED, "Post Created"),
+    GET_MY_POSTS(HttpStatus.OK, "Get My Posts"),
+    // Error
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"),
+    INVALID_KEY_RESPONSE_MESSAGE(HttpStatus.BAD_REQUEST, "Invalid Key Response"),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Unauthorized"),
+    FORBIDDEN(HttpStatus.FORBIDDEN, "Forbidden")
+    // Error field
+
+    ;
+
+    private final int statusCode;
+    private final HttpStatus status;
+    private final String message;
+
+    ResponseMessage(String message) {
+        this(HttpStatus.UNPROCESSABLE_ENTITY.value(), HttpStatus.UNPROCESSABLE_ENTITY, message);
+    }
+
+    ResponseMessage(HttpStatus status, String message) {
+        this(status.value(), status, message);
+    }
+
+    ResponseMessage(int statusCode, HttpStatus status, String message) {
+        this.statusCode = statusCode;
+        this.status = status;
+        this.message = message;
+    }
+}
