@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: PostService
+
+server:
+  port: 9004
