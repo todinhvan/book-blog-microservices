@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import vn.van.post_service.constant.ResponseMessage;
 import vn.van.post_service.dto.request.PostCreateRequest;
 import vn.van.post_service.dto.response.ApiResponse;
+import vn.van.post_service.dto.response.PageResponse;
 import vn.van.post_service.dto.response.PostResponse;
 import vn.van.post_service.service.PostService;
 
@@ -28,8 +29,12 @@ public class PostController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<PostResponse>>> getMyPosts() {
-        return  ResponseEntity.ok(toApiResponse(ResponseMessage.GET_MY_POSTS, postService.getMyPosts()));
+    public ResponseEntity<ApiResponse<PageResponse<PostResponse>>> getMyPosts(
+            @RequestParam(name = "page", defaultValue = "1", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false ) int size
+    ) {
+
+        return  ResponseEntity.ok(toApiResponse(ResponseMessage.GET_MY_POSTS, postService.getMyPosts(page, size)));
     }
 
     private <T> ApiResponse<T> toApiResponse(ResponseMessage responseMessage, T data) {

@@ -3,10 +3,15 @@ package vn.van.post_service.service.impl;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import vn.van.post_service.dto.request.PostCreateRequest;
+import vn.van.post_service.dto.response.PageResponse;
 import vn.van.post_service.dto.response.PostResponse;
 import vn.van.post_service.entity.Post;
 import vn.van.post_service.mapper.PostMapper;
@@ -36,8 +41,21 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<PostResponse> getMyPosts() {
-        return postRepository.findAllByUserId(extractUserId()).stream().map(postMapper::toPostResponse).toList();
+    public PageResponse<PostResponse> getMyPosts(int page, int size) {
+        Pageable pageable = PageRequest.of(
+                page - 1,
+                size,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+        Page<Post> pagePost = postRepository.findAllByUserId(extractUserId(), pageable);
+
+        return PageResponse.<PostResponse>builder()
+                .currentPage(page)
+                .pageSize(size)
+                .totalElements(pagePost.getTotalElements())
+                .totalPages(pagePost.getTotalPages())
+                .data(pagePost.getContent().stream().map(postMapper::toPostResponse).toList())
+                .build();
     }
 
     private String extractUserId() {
