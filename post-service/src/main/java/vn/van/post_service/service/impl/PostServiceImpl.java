@@ -10,12 +10,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import vn.van.post_service.dto.request.PostCreateRequest;
 import vn.van.post_service.dto.response.PageResponse;
 import vn.van.post_service.dto.response.PostResponse;
+import vn.van.post_service.dto.response.ProfileResponse;
 import vn.van.post_service.entity.Post;
 import vn.van.post_service.mapper.PostMapper;
 import vn.van.post_service.repository.PostRepository;
+import vn.van.post_service.repository.http_client.ProfileClient;
 import vn.van.post_service.service.PostService;
 import vn.van.post_service.util.DateTimeFormatter;
 
@@ -28,6 +31,7 @@ import java.util.List;
 public class PostServiceImpl implements PostService {
     PostRepository postRepository;
     PostMapper postMapper;
+    ProfileClient profileClient;
     DateTimeFormatter formatter;
 
     @Override
@@ -49,10 +53,19 @@ public class PostServiceImpl implements PostService {
                 size,
                 Sort.by(Sort.Direction.DESC, "createdAt")
         );
-        Page<Post> pagePost = postRepository.findAllByUserId(extractUserId(), pageable);
+        String userId = extractUserId();
+
+
+        ProfileResponse profile = profileClient.getProfile(userId).getData();
+        String displayName = StringUtils.hasText(profile.getFirstName() + profile.getLastName())
+                                ? profile.getFirstName() + profile.getLastName()
+                                : "User";
+
+        Page<Post> pagePost = postRepository.findAllByUserId(userId, pageable);
         List<PostResponse> posts = pagePost.getContent().stream()
                 .map(post -> {
                     PostResponse postResponse = postMapper.toPostResponse(post);
+                    postResponse.setDisplayName(displayName);
                     postResponse.setCreated(formatter.format(post.getCreatedAt()));
                     return postResponse;
                 }).toList();

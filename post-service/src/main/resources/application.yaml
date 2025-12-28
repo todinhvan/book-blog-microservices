@@ -7,3 +7,7 @@ spring:
 
 server:
   port: 9004
+
+app:
+  services:
+    profile: http://localhost:9002/profiles
