@@ -28,7 +28,7 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable);
 
         // config permit requests
-        http.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, AUTH_WHITELIST)
+        http.authorizeHttpRequests(request -> request.requestMatchers(AUTH_WHITELIST)
                 .permitAll()
                 .anyRequest()
                 .authenticated());

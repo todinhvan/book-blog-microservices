@@ -9,14 +9,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 import vn.van.profile_service.constant.ResponseMessage;
 import vn.van.profile_service.dto.request.ProfileCreateRequest;
+import vn.van.profile_service.dto.request.ProfileUpdateRequest;
+import vn.van.profile_service.dto.response.FileResponse;
 import vn.van.profile_service.dto.response.ProfileResponse;
 import vn.van.profile_service.dto.response.UserResponse;
 import vn.van.profile_service.entity.Profile;
 import vn.van.profile_service.exception.ApplicationException;
 import vn.van.profile_service.mapper.ProfileMapper;
 import vn.van.profile_service.repository.ProfileRepository;
+import vn.van.profile_service.repository.http_client.FileClient;
 import vn.van.profile_service.repository.http_client.IdentityClient;
 import vn.van.profile_service.service.ProfileService;
 
@@ -29,14 +33,16 @@ import java.util.List;
 public class ProfileServiceImpl implements ProfileService {
     ProfileRepository profileRepository;
     IdentityClient identityClient;
+    FileClient fileClient;
     ProfileMapper profileMapper;
 
     @Override
-    @PreAuthorize("hasAuthority('CREATE_PROFILE')")
+//    @PreAuthorize("hasAuthority('CREATE_PROFILE')")
     public ProfileResponse createProfile(ProfileCreateRequest request) {
-        verifyUser(request.getUserId());
+        UserResponse user = verifyUser(request.getUserId());
         Profile profile = profileMapper.toProfile(request);
-        profileRepository.save(profile);
+        profile.setEmail(user.getEmail());
+        profile = profileRepository.save(profile);
         return profileMapper.toProfileResponse(profile);
     }
 
@@ -47,12 +53,50 @@ public class ProfileServiceImpl implements ProfileService {
         return profileRepository.findAllByUserId(userId).stream().map(profileMapper::toProfileResponse).toList();
     }
 
-    private void verifyUser(String userId) {
-        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getCredentials();
+    @Override
+    public ProfileResponse getProfile() {
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String userIdInToken = jwt.getClaimAsString("user-id");
+        Profile profile = profileRepository.findByUserId(userIdInToken)
+                .orElseThrow(() -> new ApplicationException(ResponseMessage.USER_NOT_FOUND));
+        return profileMapper.toProfileResponse(profile);
+    }
+
+    @Override
+    public ProfileResponse updateProfile(ProfileUpdateRequest request) {
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String userIdInToken = jwt.getClaimAsString("user-id");
+
+        Profile profile = profileRepository.findByUserId(userIdInToken)
+                .orElseThrow(() -> new ApplicationException(ResponseMessage.USER_NOT_FOUND));
+        profileMapper.updateProfile(profile, request);
+        profile = profileRepository.save(profile);
+        return profileMapper.toProfileResponse(profile);
+    }
+
+    @Override
+    public ProfileResponse changeAvatar(MultipartFile file) {
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String userIdInToken = jwt.getClaimAsString("user-id");
+
+        Profile profile = profileRepository.findByUserId(userIdInToken)
+                .orElseThrow(() -> new ApplicationException(ResponseMessage.USER_NOT_FOUND));
+        FileResponse fileResponse = fileClient.uploadFile(file).getData();
+        profile.setAvatar(fileResponse.getUrl());
+
+        profile = profileRepository.save(profile);
+        return profileMapper.toProfileResponse(profile);
+    }
+
+    private UserResponse verifyUser(String userId) {
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String userIdInToken = jwt.getClaimAsString("user-id");
         if (!StringUtils.hasText(userIdInToken)) {
             throw new ApplicationException(ResponseMessage.UNAUTHORIZED);
         }
+
+        log.info("user-id: {}", userId);
+        log.info("user-id in token: {}", userIdInToken);
 
         if (!userId.equals(userIdInToken)) {
             throw new ApplicationException(ResponseMessage.FORBIDDEN);
@@ -63,5 +107,6 @@ public class ProfileServiceImpl implements ProfileService {
             throw new ApplicationException(ResponseMessage.USER_NOT_FOUND);
         }
         log.info(result.toString());
+        return result;
     }
 }

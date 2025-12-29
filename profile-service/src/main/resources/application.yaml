@@ -6,6 +6,10 @@ spring:
     authentication:
       username: neo4j
       password: 12345678
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 
 server:
   port: 9002
@@ -15,3 +19,4 @@ server:
 app:
   services:
     identity: http://localhost:9001/identity
+    file: http://localhost:9005/file

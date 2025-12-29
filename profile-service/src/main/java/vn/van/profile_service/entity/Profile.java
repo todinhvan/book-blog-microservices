@@ -24,8 +24,10 @@ public class Profile {
     @Property(name = "userId")
     String userId;
 
+    String email;
     String firstName;
     String lastName;
     LocalDate dateOfBirth;
     String city;
+    String avatar;
 }

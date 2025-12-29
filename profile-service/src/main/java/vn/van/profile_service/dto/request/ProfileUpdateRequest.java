@@ -1,4 +1,4 @@
-package vn.van.profile_service.dto.response;
+package vn.van.profile_service.dto.request;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -10,13 +10,9 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProfileResponse {
-    String id;
-    String userId;
-    String email;
+public class ProfileUpdateRequest {
     String firstName;
     String lastName;
     LocalDate dateOfBirth;
     String city;
-    String avatar;
 }
