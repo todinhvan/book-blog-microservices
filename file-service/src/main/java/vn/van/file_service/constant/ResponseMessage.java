@@ -7,12 +7,13 @@ import lombok.Getter;
 @Getter
 public enum ResponseMessage {
     // Success
-
+    FILE_UPLOADED(HttpStatus.CREATED, "File Uploaded"),
     // Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"),
     INVALID_KEY_RESPONSE_MESSAGE(HttpStatus.BAD_REQUEST, "Invalid Key Response"),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Unauthorized"),
     FORBIDDEN(HttpStatus.FORBIDDEN, "Forbidden"),
+    FILE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "File Upload Failed"),
     // Error field
 
     ;

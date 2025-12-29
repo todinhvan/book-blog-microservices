@@ -7,5 +7,9 @@ spring:
 
 server:
   port: 9005
-  servlet:
-    context-path: /file
+
+app:
+  config:
+    file:
+      storage-dir: D:/upload
+      download-prefix: http://localhost:9000/api/v1/file/
