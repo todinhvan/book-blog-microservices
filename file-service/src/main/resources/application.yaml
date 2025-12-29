@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: FileService
+  data:
+    mongodb:
+      uri: ${DB_URI_CONNECTION:mongodb://root:root@localhost:27017/file-service-data?authSource=admin}
+
+server:
+  port: 9005
+  servlet:
+    context-path: /file
