@@ -4,6 +4,8 @@ export const CONFIG = {
 
 export const API = {
   LOGIN: "/identity/auth/login",
-  MY_INFO: "/identity/users/info",
-  MY_POST: "/posts"
+  MY_INFO: "/profiles/user",
+  MY_POST: "/posts",
+  UPDATE_PROFILE: "/profiles/user/update",
+  UPDATE_AVATAR: "/profiles/user/change-avatar",
 };
