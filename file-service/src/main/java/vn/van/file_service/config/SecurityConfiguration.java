@@ -20,7 +20,9 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfiguration {
     private final CustomJwtDecoder customJwtDecoder;
 
-    private static final String[] AUTH_WHITELIST = {};
+    private static final String[] AUTH_WHITELIST = {
+            "/file/download/**"
+    };
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -28,7 +30,7 @@ public class SecurityConfiguration {
         http.csrf(AbstractHttpConfigurer::disable);
 
         // config permit requests
-        http.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, AUTH_WHITELIST)
+        http.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.GET, AUTH_WHITELIST)
                 .permitAll()
                 .anyRequest()
                 .authenticated());

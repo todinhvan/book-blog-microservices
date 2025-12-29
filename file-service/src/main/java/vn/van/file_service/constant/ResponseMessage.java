@@ -14,6 +14,8 @@ public enum ResponseMessage {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Unauthorized"),
     FORBIDDEN(HttpStatus.FORBIDDEN, "Forbidden"),
     FILE_UPLOAD_FAILED(HttpStatus.BAD_REQUEST, "File Upload Failed"),
+    FILE_NOT_FOUND(HttpStatus.NOT_FOUND, "File Not Found"),
+    INVALID_FILE(HttpStatus.BAD_REQUEST, "Invalid File"),
     // Error field
 
     ;

@@ -3,11 +3,13 @@ package vn.van.file_service.service.impl;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.core.io.Resource;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import vn.van.file_service.constant.ResponseMessage;
+import vn.van.file_service.dto.response.FileData;
 import vn.van.file_service.dto.response.FileInfo;
 import vn.van.file_service.dto.response.FileResponse;
 import vn.van.file_service.entity.FileManagement;
@@ -42,6 +44,17 @@ public class FileServiceImpl implements FileService {
 
         } catch (IOException e) {
             throw new ApplicationException(ResponseMessage.FILE_UPLOAD_FAILED);
+        }
+    }
+
+    @Override
+    public FileData download(String fileName) {
+        FileManagement fileManagement = fileManagementRepository.findById(fileName)
+                .orElseThrow(() -> new ApplicationException(ResponseMessage.FILE_NOT_FOUND));
+        try {
+            return new FileData(fileManagement.getContentType(), fileRepository.read(fileManagement));
+        } catch (IOException e) {
+            throw new ApplicationException(ResponseMessage.INVALID_FILE);
         }
     }
 

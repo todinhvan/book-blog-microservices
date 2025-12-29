@@ -1,11 +1,14 @@
 package vn.van.file_service.repository;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.DigestUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import vn.van.file_service.dto.response.FileInfo;
+import vn.van.file_service.entity.FileManagement;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -41,5 +44,10 @@ public class FileRepository {
                 .path(filePath.toString())
                 .url(downloadPrefix + fileName)
                 .build();
+    }
+
+    public Resource read(FileManagement fileManagement) throws IOException {
+        var data = Files.readAllBytes(Path.of(fileManagement.getPath()));
+        return new ByteArrayResource(data);
     }
 }
