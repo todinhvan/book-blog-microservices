@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import vn.van.profile_service.constant.ResponseMessage;
 import vn.van.profile_service.dto.request.ProfileCreateRequest;
 import vn.van.profile_service.dto.request.ProfileUpdateRequest;
+import vn.van.profile_service.dto.request.SearchUserRequest;
 import vn.van.profile_service.dto.response.ApiResponse;
 import vn.van.profile_service.dto.response.ProfileResponse;
 import vn.van.profile_service.service.ProfileService;
@@ -48,6 +49,11 @@ public class ProfileController {
     @PatchMapping("/change-avatar")
     public ResponseEntity<ApiResponse<ProfileResponse>> changeAvatar(@RequestParam("file") MultipartFile file) {
         return ResponseEntity.ok(toApiResponse(ResponseMessage.PROFILE_CHANGE_AVATAR, profileService.changeAvatar(file)));
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponse<List<ProfileResponse>>> search(@RequestBody SearchUserRequest request) {
+        return ResponseEntity.ok(toApiResponse(ResponseMessage.SEARCH, profileService.search(request)));
     }
 
     private <T> ApiResponse<T> toApiResponse(ResponseMessage responseMessage, T data) {

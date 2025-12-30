@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import vn.van.profile_service.constant.ResponseMessage;
 import vn.van.profile_service.dto.request.ProfileCreateRequest;
 import vn.van.profile_service.dto.request.ProfileUpdateRequest;
+import vn.van.profile_service.dto.request.SearchUserRequest;
 import vn.van.profile_service.dto.response.FileResponse;
 import vn.van.profile_service.dto.response.ProfileResponse;
 import vn.van.profile_service.dto.response.UserResponse;
@@ -47,7 +48,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    @PreAuthorize("hasAuthority('GET_ALL')")
+//    @PreAuthorize("hasAuthority('GET_ALL')")
     public List<ProfileResponse> getAllProfiles(String userId) {
         verifyUser(userId);
         return profileRepository.findAllByUserId(userId).stream().map(profileMapper::toProfileResponse).toList();
@@ -86,6 +87,18 @@ public class ProfileServiceImpl implements ProfileService {
 
         profile = profileRepository.save(profile);
         return profileMapper.toProfileResponse(profile);
+    }
+
+    @Override
+    public List<ProfileResponse> search(SearchUserRequest request) {
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String userIdInToken = jwt.getClaimAsString("user-id");
+
+        List<Profile> profiles = profileRepository.findAllByEmailLike(request.getKeyword());
+        return profiles.stream()
+                .filter(profile -> !profile.getId().equals(userIdInToken))
+                .map(profileMapper::toProfileResponse)
+                .toList();
     }
 
     private UserResponse verifyUser(String userId) {

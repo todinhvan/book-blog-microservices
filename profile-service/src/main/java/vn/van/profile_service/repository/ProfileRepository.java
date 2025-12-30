@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface ProfileRepository extends Neo4jRepository<Profile, String> {
     List<Profile> findAllByUserId(String userId);
     Optional<Profile> findByUserId(String userId);
+    List<Profile> findAllByEmailLike(String email);
 }

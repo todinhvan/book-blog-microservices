@@ -12,6 +12,7 @@ public enum ResponseMessage {
     PROFILE_GET(HttpStatus.OK, "Profile Get"),
     PROFILE_UPDATED(HttpStatus.OK, "Profile Updated"),
     PROFILE_CHANGE_AVATAR(HttpStatus.OK, "Profile Change Avatar"),
+    SEARCH(HttpStatus.OK, "Search"),
     // Error
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Unauthorized"),
     FORBIDDEN(HttpStatus.FORBIDDEN, "Forbidden"),
