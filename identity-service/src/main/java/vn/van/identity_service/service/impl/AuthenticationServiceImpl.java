@@ -132,15 +132,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public IntrospectResponse introspect(AuthenticationRequest request) {
+        IntrospectResponse response = new IntrospectResponse();
         boolean isValid = true;
         try {
-            verifyToken(request.getToken(), false);
+            SignedJWT signedJWT = verifyToken(request.getToken(), false);
+            response.setUserId(signedJWT.getJWTClaimsSet().getClaimAsString("user-id"));
         } catch (ParseException | JOSEException | ApplicationException e) {
             log.error(e.toString());
             isValid = false;
         }
 
-        IntrospectResponse response = new IntrospectResponse();
         response.setValid(isValid);
         return response;
     }
