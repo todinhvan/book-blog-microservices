@@ -17,3 +17,4 @@ app:
       port: 8000
   services:
     profile: http://localhost:9002/profiles
+    identity: http://localhost:9001/identity
