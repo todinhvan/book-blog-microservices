@@ -1,5 +1,6 @@
 package vn.van.chat_service.service.impl;
 
+import com.corundumstudio.socketio.SocketIOServer;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,6 +28,7 @@ public class ChatMessageServiceImpl implements ChatMessageService {
     ChatMessageRepository chatMessageRepository;
     ConversationRepository conversationRepository;
     ChatMessageMapper chatMessageMapper;
+    SocketIOServer socketIOServer;
 
     @Override
     public ChatMessageResponse createMessage(ChatMessageCreateRequest request) {
@@ -35,6 +37,10 @@ public class ChatMessageServiceImpl implements ChatMessageService {
         chatMessage.setSender(sender);
         chatMessage.setCreatedAt(Instant.now());
         chatMessage =  chatMessageRepository.save(chatMessage);
+
+        socketIOServer.getAllClients()
+                .forEach(client -> client.sendEvent("message", "Message: " + request.getMessage()));
+
         return toChatMessageResponse(chatMessage);
     }
 
