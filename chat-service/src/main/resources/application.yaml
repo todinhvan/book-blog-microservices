@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: ChatService
+  data:
+    mongodb:
+      uri: ${DB_URI_CONNECTION:mongodb://root:root@localhost:27017/chat-service-data?authSource=admin}
+
+server:
+  port: 9006
+
+app:
+  services:
+    profile: http://localhost:9002/profiles
