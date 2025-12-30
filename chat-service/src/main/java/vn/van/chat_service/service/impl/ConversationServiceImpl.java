@@ -59,17 +59,20 @@ public class ConversationServiceImpl implements ConversationService {
         participantIds.add(participant.getId());
         String participantHash = generateParticipantHash(participantIds.stream().sorted().toList());
 
-        List<ParticipantInfo> participants = new ArrayList<>();
-        participants.add(participantInfoMapper.toParticipantInfo(user));
-        participants.add(participantInfoMapper.toParticipantInfo(participant));
+        Conversation conversation = conversationRepository.findByParticipantsHash(participantHash)
+                .orElseGet(() -> {
+                    List<ParticipantInfo> participants = new ArrayList<>();
+                    participants.add(participantInfoMapper.toParticipantInfo(user));
+                    participants.add(participantInfoMapper.toParticipantInfo(participant));
 
-        Conversation conversation = new Conversation();
-        conversation.setType(request.getType());
-        conversation.setParticipants(participants);
-        conversation.setParticipantsHash(participantHash);
-        conversation.setCreatedAt(Instant.now());
-        conversation.setUpdatedAt(Instant.now());
-        conversation = conversationRepository.save(conversation);
+                    Conversation newConversation = new Conversation();
+                    newConversation.setType(request.getType());
+                    newConversation.setParticipants(participants);
+                    newConversation.setParticipantsHash(participantHash);
+                    newConversation.setCreatedAt(Instant.now());
+                    newConversation.setUpdatedAt(Instant.now());
+                    return conversationRepository.save(newConversation);
+                });
 
         return toConversationResponse(conversation);
     }
