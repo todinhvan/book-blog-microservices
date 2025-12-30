@@ -40,7 +40,7 @@ public class ConversationServiceImpl implements ConversationService {
     public List<ConversationResponse> myConversations() {
         String currentUserId = extractUserId();
         log.info(currentUserId);
-        List<Conversation> conversations = conversationRepository.findAllByParticipantUserId(currentUserId);
+        List<Conversation> conversations = conversationRepository.findAllByParticipantsUserId(currentUserId);
         return conversations.stream().map(this::toConversationResponse).toList();
     }
 

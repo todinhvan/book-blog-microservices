@@ -13,5 +13,5 @@ public interface ConversationRepository extends MongoRepository<Conversation, St
     Optional<Conversation> findByParticipantsHash(String hash);
 
     @Query("{'participants.userId' : ?0}")
-    List<Conversation> findAllByParticipantUserId(String userId);
+    List<Conversation> findAllByParticipantsUserId(String userId);
 }

@@ -18,6 +18,7 @@ public enum ResponseMessage {
     FORBIDDEN(HttpStatus.FORBIDDEN, "Forbidden"),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User Not Found"),
     CONVERSATION_NOT_FOUND(HttpStatus.NOT_FOUND, "Conversation Not Found"),
+    INVALID_MAPPING(HttpStatus.BAD_REQUEST, "Invalid Mapping"),
     // Error field
     PARTICIPANT_IDS_NOT_NULL("Create conversation: ParticipantIds must not be null"),
     PARTICIPANT_IDS_SIZE_MIN_1("Create conversation: ParticipantIds size min 1"),

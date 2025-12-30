@@ -30,6 +30,7 @@ public class SocketServiceImpl implements SocketService {
                 response.setValid(false);
             }
             response.setValid(introspectData.getData().isValid());
+            response.setUserId(introspectData.getData().getUserId());
         } catch (Exception e) {
             response.setValid(false);
         }
