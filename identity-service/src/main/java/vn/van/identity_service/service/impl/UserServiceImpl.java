@@ -16,9 +16,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.constant.RoleType;
 import vn.van.identity_service.dto.request.ProfileCreateRequest;
+import vn.van.identity_service.dto.request.UserCreatePasswordRequest;
 import vn.van.identity_service.dto.request.UserCreateRequest;
 import vn.van.identity_service.dto.request.UserUpdateRequest;
 import vn.van.identity_service.dto.response.UserResponse;
@@ -70,7 +72,18 @@ public class UserServiceImpl implements UserService {
     public UserResponse getInfo() {
         Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = existsUser(jwt.getClaimAsString("user-id"));
-        return userMapper.toUserResponse(user);
+
+        UserResponse response = userMapper.toUserResponse(user);
+        response.setStatus(StringUtils.hasText(user.getPassword()) ? "" : "NO_PASSWORD");
+        return response;
+    }
+
+    @Override
+    public void createPassword(UserCreatePasswordRequest request) {
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = existsUser(jwt.getClaimAsString("user-id"));
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        userRepository.save(user);
     }
 
     @Override

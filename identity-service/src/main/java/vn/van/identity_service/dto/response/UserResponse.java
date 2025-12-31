@@ -19,4 +19,5 @@ public class UserResponse {
     LocalDate dateOfBirth;
     String city;
     Set<RoleResponse> roles;
+    String status;
 }

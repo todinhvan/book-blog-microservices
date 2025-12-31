@@ -38,6 +38,7 @@ app:
     profile: http://localhost:9002/profiles
     google-oauth2:
       token-uri: https://oauth2.googleapis.com
+      profile-uri: https://www.googleapis.com
       client-id: ${OAUTH2_CLIENT_ID}
       client-secret: ${OAUTH2_CLIENT_SECRET}
       grant-type: authorization_code

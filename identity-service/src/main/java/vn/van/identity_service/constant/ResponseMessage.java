@@ -13,6 +13,7 @@ public enum ResponseMessage {
     USER_GET_ALL(HttpStatus.OK, "User Get All"),
     USER_UPDATED(HttpStatus.ACCEPTED, "User Updated"),
     USER_DELETED(HttpStatus.NO_CONTENT, "User Deleted"),
+    USER_PASSWORD_CREATED(HttpStatus.CREATED, "User Password Created"),
     ROLE_CREATED(HttpStatus.CREATED, "Role Created"),
     ROLE_GET_ALL(HttpStatus.OK, "Role Get All"),
     ROLE_UPDATED(HttpStatus.ACCEPTED, "Role Updated"),

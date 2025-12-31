@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import vn.van.identity_service.constant.ResponseMessage;
+import vn.van.identity_service.dto.request.UserCreatePasswordRequest;
 import vn.van.identity_service.dto.request.UserCreateRequest;
 import vn.van.identity_service.dto.request.UserUpdateRequest;
 import vn.van.identity_service.dto.response.ApiResponse;
@@ -42,6 +43,13 @@ public class UserController {
     public ResponseEntity<ApiResponse<UserResponse>> getUser(@PathVariable String userId) {
         log.info("getUser");
         return ResponseEntity.ok(toApiResponse(ResponseMessage.USER_GET, userService.getUser(userId)));
+    }
+
+    @PostMapping("create-password")
+    public ResponseEntity<ApiResponse<Void>> createPassword(@RequestBody @Valid UserCreatePasswordRequest request) {
+        log.info("createPassword");
+        userService.createPassword(request);
+        return ResponseEntity.ok(toApiResponse(ResponseMessage.USER_PASSWORD_CREATED, null));
     }
 
     @GetMapping

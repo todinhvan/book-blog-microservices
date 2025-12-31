@@ -30,11 +30,9 @@ import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.constant.RoleType;
 import vn.van.identity_service.dto.event.NotificationEvent;
 import vn.van.identity_service.dto.request.*;
-import vn.van.identity_service.dto.response.AuthenticationResponse;
-import vn.van.identity_service.dto.response.ExchangeTokenResponse;
-import vn.van.identity_service.dto.response.IntrospectResponse;
-import vn.van.identity_service.dto.response.ProfileResponse;
+import vn.van.identity_service.dto.response.*;
 import vn.van.identity_service.entity.BlacklistToken;
+import vn.van.identity_service.entity.Role;
 import vn.van.identity_service.entity.User;
 import vn.van.identity_service.exception.ApplicationException;
 import vn.van.identity_service.mapper.AuthenticationMapper;
@@ -43,6 +41,7 @@ import vn.van.identity_service.repository.BlacklistTokenRepository;
 import vn.van.identity_service.repository.RoleRepository;
 import vn.van.identity_service.repository.UserRepository;
 import vn.van.identity_service.repository.http_client.OutboundAuthenticateClient;
+import vn.van.identity_service.repository.http_client.OutboundProfileClient;
 import vn.van.identity_service.repository.http_client.ProfileClient;
 import vn.van.identity_service.service.AuthenticationService;
 
@@ -56,6 +55,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     BlacklistTokenRepository blacklistTokenRepository;
     ProfileClient profileClient;
     OutboundAuthenticateClient outboundAuthenticateClient;
+    OutboundProfileClient outboundProfileClient;
     PasswordEncoder passwordEncoder;
     AuthenticationMapper authenticationMapper;
     ProfileMapper profileMapper;
@@ -173,8 +173,24 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         ExchangeTokenResponse tokenResponse = outboundAuthenticateClient.exchangeToken(request);
 
+        OutboundProfileResponse profileResponse = outboundProfileClient.getUserProfile(
+                "json",
+                tokenResponse.getAccessToken()
+        );
+
+        User user = userRepository.findByEmail(profileResponse.getEmail())
+                .orElseGet(() -> {
+                    User newUser = new User();
+                    newUser.setEmail(profileResponse.getEmail());
+                    newUser.setFirstName(profileResponse.getGivenName());
+                    newUser.setLastName(profileResponse.getFamilyName());
+                    Role role = roleRepository.findById(RoleType.USER.name()).orElseThrow(() -> new ApplicationException(ResponseMessage.ROLE_NOT_FOUND));
+                    newUser.setRoles(Set.of(role));
+                    return userRepository.save(newUser);
+                });
+
         AuthenticationResponse response = new AuthenticationResponse();
-        response.setToken(tokenResponse.getAccessToken());
+        response.setToken(generateToken(user));
         return response;
     }
 
