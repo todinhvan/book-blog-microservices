@@ -14,6 +14,7 @@ import GoogleIcon from "@mui/icons-material/Google";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { logIn, isAuthenticated } from "../services/authenticationService";
+import { OAuthConfig } from "../configurations/configuration";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -24,12 +25,6 @@ export default function Login() {
     }
 
     setSnackBarOpen(false);
-  };
-
-  const handleClick = () => {
-    alert(
-      "Please refer to Oauth2 docs"
-    );
   };
 
   useEffect(() => {
@@ -55,6 +50,20 @@ export default function Login() {
       setSnackBarMessage(errorResponse.message);
       setSnackBarOpen(true);
     }
+  };
+
+  const handleClick = () => {
+    const callbackUrl = OAuthConfig.redirectUri;
+    const authUrl = OAuthConfig.authUri;
+    const googleClientId = OAuthConfig.clientId;
+
+    const targetUrl = `${authUrl}?redirect_uri=${encodeURIComponent(
+      callbackUrl
+    )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`;
+
+    console.log(targetUrl);
+
+    window.location.href = targetUrl;
   };
 
   return (
