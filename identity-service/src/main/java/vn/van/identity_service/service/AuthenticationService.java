@@ -15,5 +15,7 @@ public interface AuthenticationService {
 
     IntrospectResponse introspect(AuthenticationRequest request);
 
+    AuthenticationResponse outboundAuthenticate(String code);
+
     AuthenticationResponse refreshToken(AuthenticationRequest request);
 }

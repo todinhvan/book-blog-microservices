@@ -36,3 +36,9 @@ app:
       clean-blacklist-token-expired: "0 0 0 * * *"
   services:
     profile: http://localhost:9002/profiles
+    google-oauth2:
+      token-uri: https://oauth2.googleapis.com
+      client-id: ${OAUTH2_CLIENT_ID}
+      client-secret: ${OAUTH2_CLIENT_SECRET}
+      grant-type: authorization_code
+      redirect-uri: http://localhost:3000/authenticate

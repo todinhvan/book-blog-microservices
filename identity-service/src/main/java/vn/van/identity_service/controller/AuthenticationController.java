@@ -1,10 +1,7 @@
 package vn.van.identity_service.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +53,14 @@ public class AuthenticationController {
         log.info("introspect");
         ApiResponse<IntrospectResponse> response =
                 toApiResponse(ResponseMessage.INTROSPECT_SUCCESS, authenticationService.introspect(request));
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/outbound/authenticate")
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> outboundAuthenticate(@RequestParam String code) {
+        log.info("outboundAuthenticate");
+        ApiResponse<AuthenticationResponse> response =
+                toApiResponse(ResponseMessage.EXCHANGE_TOKEN_SUCCESS, authenticationService.outboundAuthenticate(code));
         return ResponseEntity.ok(response);
     }
 

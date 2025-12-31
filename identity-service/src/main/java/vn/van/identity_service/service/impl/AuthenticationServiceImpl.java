@@ -29,11 +29,9 @@ import lombok.extern.slf4j.Slf4j;
 import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.constant.RoleType;
 import vn.van.identity_service.dto.event.NotificationEvent;
-import vn.van.identity_service.dto.request.AuthenticationRequest;
-import vn.van.identity_service.dto.request.LoginRequest;
-import vn.van.identity_service.dto.request.ProfileCreateRequest;
-import vn.van.identity_service.dto.request.RegisterRequest;
+import vn.van.identity_service.dto.request.*;
 import vn.van.identity_service.dto.response.AuthenticationResponse;
+import vn.van.identity_service.dto.response.ExchangeTokenResponse;
 import vn.van.identity_service.dto.response.IntrospectResponse;
 import vn.van.identity_service.dto.response.ProfileResponse;
 import vn.van.identity_service.entity.BlacklistToken;
@@ -44,6 +42,7 @@ import vn.van.identity_service.mapper.ProfileMapper;
 import vn.van.identity_service.repository.BlacklistTokenRepository;
 import vn.van.identity_service.repository.RoleRepository;
 import vn.van.identity_service.repository.UserRepository;
+import vn.van.identity_service.repository.http_client.OutboundAuthenticateClient;
 import vn.van.identity_service.repository.http_client.ProfileClient;
 import vn.van.identity_service.service.AuthenticationService;
 
@@ -56,6 +55,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     RoleRepository roleRepository;
     BlacklistTokenRepository blacklistTokenRepository;
     ProfileClient profileClient;
+    OutboundAuthenticateClient outboundAuthenticateClient;
     PasswordEncoder passwordEncoder;
     AuthenticationMapper authenticationMapper;
     ProfileMapper profileMapper;
@@ -72,6 +72,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @NonFinal
     @Value("${app.config.refresh-token-expire-time}")
     long refreshTokenExpireTime;
+
+    @NonFinal
+    @Value("${app.services.google-oauth2.client-id}")
+    String oauthClientId;
+
+    @NonFinal
+    @Value("${app.services.google-oauth2.client-secret}")
+    String oauthClientSecret;
+
+    @NonFinal
+    @Value("${app.services.google-oauth2.grant-type}")
+    String oauthGrantType;
+
+    @NonFinal
+    @Value("${app.services.google-oauth2.redirect-uri}")
+    String oauthRedirectUri;
 
     @Override
     public AuthenticationResponse register(RegisterRequest request) {
@@ -143,6 +159,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
 
         response.setValid(isValid);
+        return response;
+    }
+
+    @Override
+    public AuthenticationResponse outboundAuthenticate(String code) {
+        ExchangeTokenRequest request = new ExchangeTokenRequest();
+        request.setCode(code);
+        request.setClientId(oauthClientId);
+        request.setClientSecret(oauthClientSecret);
+        request.setGrantType(oauthGrantType);
+        request.setRedirectUri(oauthRedirectUri);
+
+        ExchangeTokenResponse tokenResponse = outboundAuthenticateClient.exchangeToken(request);
+
+        AuthenticationResponse response = new AuthenticationResponse();
+        response.setToken(tokenResponse.getAccessToken());
         return response;
     }
 
