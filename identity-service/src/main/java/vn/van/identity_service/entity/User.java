@@ -25,10 +25,13 @@ public class User {
     @Column(name = "email", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String email;
 
+    String username;
     String password;
     LocalDate dateOfBirth;
     String city;
 
     @ManyToMany
     Set<Role> roles;
+
+    String keycloakUserId;
 }

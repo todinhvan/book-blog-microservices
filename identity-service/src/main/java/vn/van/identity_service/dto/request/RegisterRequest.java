@@ -14,6 +14,8 @@ import lombok.experimental.FieldDefaults;
 public class RegisterRequest {
     @NotBlank(message = "USER_FIRST_NAME_NOT_BLANK")
     String firstName;
+    String lastName;
+    String username;
 
     @Email(message = "USER_EMAIL_INVALID")
     String email;

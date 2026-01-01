@@ -3,13 +3,11 @@ package vn.van.identity_service.service.impl;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.UUID;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,6 +27,10 @@ import lombok.extern.slf4j.Slf4j;
 import vn.van.identity_service.constant.ResponseMessage;
 import vn.van.identity_service.constant.RoleType;
 import vn.van.identity_service.dto.event.NotificationEvent;
+import vn.van.identity_service.dto.keycloak.request.Credential;
+import vn.van.identity_service.dto.keycloak.request.ExchangeClientTokenRequest;
+import vn.van.identity_service.dto.keycloak.request.UserCreateRequest;
+import vn.van.identity_service.dto.keycloak.response.ExchangeClientTokenResponse;
 import vn.van.identity_service.dto.request.*;
 import vn.van.identity_service.dto.response.*;
 import vn.van.identity_service.entity.BlacklistToken;
@@ -40,6 +42,7 @@ import vn.van.identity_service.mapper.ProfileMapper;
 import vn.van.identity_service.repository.BlacklistTokenRepository;
 import vn.van.identity_service.repository.RoleRepository;
 import vn.van.identity_service.repository.UserRepository;
+import vn.van.identity_service.repository.http_client.KeycloakClient;
 import vn.van.identity_service.repository.http_client.OutboundAuthenticateClient;
 import vn.van.identity_service.repository.http_client.OutboundProfileClient;
 import vn.van.identity_service.repository.http_client.ProfileClient;
@@ -56,6 +59,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     ProfileClient profileClient;
     OutboundAuthenticateClient outboundAuthenticateClient;
     OutboundProfileClient outboundProfileClient;
+    KeycloakClient keycloakClient;
     PasswordEncoder passwordEncoder;
     AuthenticationMapper authenticationMapper;
     ProfileMapper profileMapper;
@@ -89,10 +93,48 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Value("${app.services.google-oauth2.redirect-uri}")
     String oauthRedirectUri;
 
+    @NonFinal
+    @Value("${app.services.keycloak.client-id}")
+    String keycloakClientId;
+
+    @NonFinal
+    @Value("${app.services.keycloak.client-secret}")
+    String keycloakClientSecret;
+
     @Override
     public AuthenticationResponse register(RegisterRequest request) {
+        // Get client token from keycloak
+        ExchangeClientTokenRequest tokenRequest = new ExchangeClientTokenRequest();
+        tokenRequest.setGrant_type("client_credentials");
+        tokenRequest.setScope("openid");
+        tokenRequest.setClient_id(keycloakClientId);
+        tokenRequest.setClient_secret(keycloakClientSecret);
+        ExchangeClientTokenResponse tokenResponse = keycloakClient.exchangeToken(tokenRequest);
+
+        //Create user for keycloak
+        Credential credential = new Credential();
+        credential.setType("password");
+        credential.setValue(request.getPassword());
+        credential.setTemporary(false);
+
+        UserCreateRequest userRequest = new UserCreateRequest();
+        userRequest.setUsername(request.getUsername());
+        userRequest.setFirstName(request.getFirstName());
+        userRequest.setLastName(request.getLastName());
+        userRequest.setEnabled(true);
+        userRequest.setEmail(request.getEmail());
+        userRequest.setEmailVerified(false);
+        userRequest.setCredentials(List.of(credential));
+
+        ResponseEntity<?> createResponse = keycloakClient
+                .createUser("Bearer " + tokenResponse.getAccessToken(), userRequest);
+        String location = createResponse.getHeaders().getLocation().toString();
+        String keycloakUserId = location.substring(location.lastIndexOf("/") + 1);
+        log.info("KeycloakUserId: {}", keycloakUserId);
+
         request.setPassword(passwordEncoder.encode(request.getPassword()));
         User user = authenticationMapper.toUser(request);
+        user.setKeycloakUserId(keycloakUserId);
         user.setRoles(Set.of(roleRepository
                 .findById(RoleType.USER.name())
                 .orElseThrow(() -> new ApplicationException(ResponseMessage.ROLE_NOT_FOUND))));
