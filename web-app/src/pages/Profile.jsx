@@ -25,6 +25,7 @@ import {
 } from "../services/userService";
 import { isAuthenticated, logOut } from "../services/authenticationService";
 import Scene from "./Scene";
+import keycloak from "../keycloak";
 
 export default function Profile() {
   const navigate = useNavigate();

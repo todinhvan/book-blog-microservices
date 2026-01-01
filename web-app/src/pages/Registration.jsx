@@ -3,22 +3,16 @@ import {
   Button,
   Card,
   CardContent,
-  Divider,
   TextField,
   Typography,
   Snackbar,
   Alert,
 } from "@mui/material";
 
-import GoogleIcon from "@mui/icons-material/Google";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { logIn, isAuthenticated } from "../services/authenticationService";
-import { OAuthConfig } from "../configurations/configuration";
-import keycloak from "../keycloak";
+import { useState } from "react";
+import { register } from "../services/userService";
 
-export default function Login() {
-  const navigate = useNavigate();
+export default function Registration() {
 
   const handleCloseSnackBar = (event, reason) => {
     if (reason === "clickaway") {
@@ -28,14 +22,12 @@ export default function Login() {
     setSnackBarOpen(false);
   };
 
-  useEffect(() => {
-    if (isAuthenticated()) {
-      navigate("/");
-    }
-  }, [navigate]);
-
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setLastname] = useState("");
+  const [email, setEmail] = useState("");
+  const [snackSeverity, setSnackSeverity] = useState("info");
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   const [snackBarMessage, setSnackBarMessage] = useState("");
 
@@ -43,28 +35,26 @@ export default function Login() {
     event.preventDefault();
 
     try {
-      const response = await logIn(email, password);
+      const data = {
+        username: username,
+        password: password,
+        firstName: firstname,
+        lastName: lastname,
+        email: email,
+      };
+
+      let response = await register(data);
+
       console.log("Response body:", response.data);
-      navigate("/");
+      setSnackSeverity("success");
+      setSnackBarMessage("Registration completed successfully!");
+      setSnackBarOpen(true);
     } catch (error) {
       const errorResponse = error.response.data;
+      setSnackSeverity("error");
       setSnackBarMessage(errorResponse.message);
       setSnackBarOpen(true);
     }
-  };
-
-  const handleClick = () => {
-    const callbackUrl = OAuthConfig.redirectUri;
-    const authUrl = OAuthConfig.authUri;
-    const googleClientId = OAuthConfig.clientId;
-
-    const targetUrl = `${authUrl}?redirect_uri=${encodeURIComponent(
-      callbackUrl
-    )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`;
-
-    console.log(targetUrl);
-
-    window.location.href = targetUrl;
   };
 
   return (
@@ -77,7 +67,7 @@ export default function Login() {
       >
         <Alert
           onClose={handleCloseSnackBar}
-          severity="error"
+          severity={snackSeverity}
           variant="filled"
           sx={{ width: "100%" }}
         >
@@ -94,8 +84,8 @@ export default function Login() {
       >
         <Card
           sx={{
-            minWidth: 300,
-            maxWidth: 400,
+            minWidth: 400,
+            maxWidth: 500,
             boxShadow: 3,
             borderRadius: 3,
             padding: 4,
@@ -103,7 +93,7 @@ export default function Login() {
         >
           <CardContent>
             <Typography variant="h5" component="h1" gutterBottom>
-              Welcome to Authen App
+              Welcome, let's create an account
             </Typography>
             <Box
               component="form"
@@ -115,12 +105,12 @@ export default function Login() {
               onSubmit={handleSubmit}
             >
               <TextField
-                label="Email"
+                label="Username"
                 variant="outlined"
                 fullWidth
                 margin="normal"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
               <TextField
                 label="Password"
@@ -130,6 +120,30 @@ export default function Login() {
                 margin="normal"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+              />
+               <TextField
+                label="Email"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <TextField
+                label="Firstname"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={firstname}
+                onChange={(e) => setFirstname(e.target.value)}
+              />
+              <TextField
+                label="Lastname"
+                variant="outlined"
+                fullWidth
+                margin="normal"
+                value={lastname}
+                onChange={(e) => setLastname(e.target.value)}
               />
               <Button
                 type="submit"
@@ -143,41 +157,7 @@ export default function Login() {
                   mb: "25px",
                 }}
               >
-                Login
-              </Button>
-              <Divider></Divider>
-            </Box>
-
-            <Box display="flex" flexDirection="column" width="100%" gap="25px">
-              <Button
-                type="button"
-                variant="contained"
-                color="secondary"
-                size="large"
-                onClick={handleClick}
-                fullWidth
-                sx={{ gap: "10px" }}
-              >
-                <GoogleIcon />
-                Continue with Google
-              </Button>
-              {/* <Button
-                type="submit"
-                variant="contained"
-                color="warning"
-                size="large"
-                onClick={() => keycloak.login()}
-              >
-                Login with Keycloak
-              </Button> */}
-              <Button
-                type="submit"
-                variant="contained"
-                color="success"
-                size="large"
-                onClick={() => navigate("/register")}
-              >
-                Create an account
+                Register
               </Button>
             </Box>
           </CardContent>
