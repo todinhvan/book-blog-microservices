@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import feign.FeignException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -37,6 +38,7 @@ import vn.van.identity_service.entity.BlacklistToken;
 import vn.van.identity_service.entity.Role;
 import vn.van.identity_service.entity.User;
 import vn.van.identity_service.exception.ApplicationException;
+import vn.van.identity_service.exception.ErrorNormalizer;
 import vn.van.identity_service.mapper.AuthenticationMapper;
 import vn.van.identity_service.mapper.ProfileMapper;
 import vn.van.identity_service.repository.BlacklistTokenRepository;
@@ -64,6 +66,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     AuthenticationMapper authenticationMapper;
     ProfileMapper profileMapper;
     KafkaTemplate<String, Object> kafkaTemplate;
+    ErrorNormalizer errorNormalizer;
 
     @NonFinal
     @Value("${app.config.jwt-secret}")
@@ -103,61 +106,67 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public AuthenticationResponse register(RegisterRequest request) {
-        // Get client token from keycloak
-        ExchangeClientTokenRequest tokenRequest = new ExchangeClientTokenRequest();
-        tokenRequest.setGrant_type("client_credentials");
-        tokenRequest.setScope("openid");
-        tokenRequest.setClient_id(keycloakClientId);
-        tokenRequest.setClient_secret(keycloakClientSecret);
-        ExchangeClientTokenResponse tokenResponse = keycloakClient.exchangeToken(tokenRequest);
-
-        //Create user for keycloak
-        Credential credential = new Credential();
-        credential.setType("password");
-        credential.setValue(request.getPassword());
-        credential.setTemporary(false);
-
-        UserCreateRequest userRequest = new UserCreateRequest();
-        userRequest.setUsername(request.getUsername());
-        userRequest.setFirstName(request.getFirstName());
-        userRequest.setLastName(request.getLastName());
-        userRequest.setEnabled(true);
-        userRequest.setEmail(request.getEmail());
-        userRequest.setEmailVerified(false);
-        userRequest.setCredentials(List.of(credential));
-
-        ResponseEntity<?> createResponse = keycloakClient
-                .createUser("Bearer " + tokenResponse.getAccessToken(), userRequest);
-        String location = createResponse.getHeaders().getLocation().toString();
-        String keycloakUserId = location.substring(location.lastIndexOf("/") + 1);
-        log.info("KeycloakUserId: {}", keycloakUserId);
-
-        request.setPassword(passwordEncoder.encode(request.getPassword()));
-        User user = authenticationMapper.toUser(request);
-        user.setKeycloakUserId(keycloakUserId);
-        user.setRoles(Set.of(roleRepository
-                .findById(RoleType.USER.name())
-                .orElseThrow(() -> new ApplicationException(ResponseMessage.ROLE_NOT_FOUND))));
-
         try {
-            user = userRepository.save(user);
-        } catch (DataIntegrityViolationException e) {
+            // Get client token from keycloak
+            ExchangeClientTokenRequest tokenRequest = new ExchangeClientTokenRequest();
+            tokenRequest.setGrant_type("client_credentials");
+            tokenRequest.setScope("openid");
+            tokenRequest.setClient_id(keycloakClientId);
+            tokenRequest.setClient_secret(keycloakClientSecret);
+            ExchangeClientTokenResponse tokenResponse = keycloakClient.exchangeToken(tokenRequest);
+
+            //Create user for keycloak
+            Credential credential = new Credential();
+            credential.setType("password");
+            credential.setValue(request.getPassword());
+            credential.setTemporary(false);
+
+            UserCreateRequest userRequest = new UserCreateRequest();
+            userRequest.setUsername(request.getUsername());
+            userRequest.setFirstName(request.getFirstName());
+            userRequest.setLastName(request.getLastName());
+            userRequest.setEnabled(true);
+            userRequest.setEmail(request.getEmail());
+            userRequest.setEmailVerified(false);
+            userRequest.setCredentials(List.of(credential));
+
+            ResponseEntity<?> createResponse = keycloakClient
+                    .createUser("Bearer " + tokenResponse.getAccessToken(), userRequest);
+            String location = createResponse.getHeaders().getLocation().toString();
+            String keycloakUserId = location.substring(location.lastIndexOf("/") + 1);
+            log.info("KeycloakUserId: {}", keycloakUserId);
+
+            request.setPassword(passwordEncoder.encode(request.getPassword()));
+            User user = authenticationMapper.toUser(request);
+            user.setKeycloakUserId(keycloakUserId);
+            user.setRoles(Set.of(roleRepository
+                    .findById(RoleType.USER.name())
+                    .orElseThrow(() -> new ApplicationException(ResponseMessage.ROLE_NOT_FOUND))));
+
+            try {
+                user = userRepository.save(user);
+            } catch (DataIntegrityViolationException e) {
+                throw new ApplicationException(ResponseMessage.USER_EXISTED);
+            }
+
+            ProfileCreateRequest profileCreateRequest = profileMapper.toProfileCreateRequest(user);
+            profileCreateRequest.setUserId(user.getId());
+            ProfileResponse profileResponse = profileClient.createDefaultProfile(profileCreateRequest).getData();
+            log.info("User Id of Profile: {}", profileResponse.getUserId());
+
+            kafkaTemplate.send("user-created", NotificationEvent.builder()
+                    .channel("email")
+                    .recipient(user.getEmail())
+                    .build());
+
+            AuthenticationResponse response = new AuthenticationResponse();
+            response.setToken(generateToken(user));
+            return response;
+        } catch (FeignException e) {
+            throw errorNormalizer.toApplicationException(e);
+        }  catch (DataIntegrityViolationException e) {
             throw new ApplicationException(ResponseMessage.USER_EXISTED);
         }
-
-        ProfileCreateRequest profileCreateRequest = profileMapper.toProfileCreateRequest(user);
-        profileCreateRequest.setUserId(user.getId());
-        ProfileResponse profileResponse = profileClient.createDefaultProfile(profileCreateRequest).getData();
-        log.info("User Id of Profile: {}", profileResponse.getUserId());
-
-        kafkaTemplate.send("user-created", NotificationEvent.builder()
-                .channel("email")
-                .recipient(user.getEmail())
-                .build());
-
-        AuthenticationResponse response = new AuthenticationResponse();
-        response.setToken(generateToken(user));
-        return response;
     }
 
     @Override

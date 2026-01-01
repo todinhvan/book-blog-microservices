@@ -27,6 +27,7 @@ public enum ResponseMessage {
     EXCHANGE_TOKEN_SUCCESS(HttpStatus.OK, "Exchange Token Success"),
     // Error
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "Internal Server Error"),
+    UNCATEGORIZED(HttpStatus.BAD_REQUEST, "Uncategorized"),
     INVALID_KEY_RESPONSE_MESSAGE(HttpStatus.BAD_REQUEST, "Invalid Key Response"),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "User not found"),
     USER_EXISTED(HttpStatus.CONFLICT, "User already exists"),
@@ -42,7 +43,10 @@ public enum ResponseMessage {
     REFRESH_TOKEN_SUCCESS(HttpStatus.OK, "Refresh Token Success"),
     FORBIDDEN(HttpStatus.FORBIDDEN, "Forbidden"),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "Unauthorized"),
+    USERNAME_EXISTED(HttpStatus.CONFLICT, "Username already exists"),
+    EMAIL_EXISTED(HttpStatus.CONFLICT, "Email already exists"),
     // Error field
+    USERNAME_MISSING("Username missing"),
     USER_FIRST_NAME_NOT_BLANK("User: First name is not empty"),
     USER_LAST_NAME_NOT_NULL("User: Last name is require"),
     USER_EMAIL_INVALID("User: Email is invalid"),
