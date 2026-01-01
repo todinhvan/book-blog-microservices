@@ -68,10 +68,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @PostAuthorize("returnObject.email == authentication.name")
+//    @PostAuthorize("returnObject.email == authentication.name")
     public UserResponse getInfo() {
         Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        User user = existsUser(jwt.getClaimAsString("user-id"));
+        User user = null;
+        try {
+            user = existsUser(jwt.getClaimAsString("user-id"));
+        } catch (Exception e) {
+            user = userRepository.findByKeycloakUserId(jwt.getSubject())
+                    .orElseThrow(() -> new ApplicationException(ResponseMessage.USER_NOT_FOUND));
+        }
 
         UserResponse response = userMapper.toUserResponse(user);
         response.setStatus(StringUtils.hasText(user.getPassword()) ? "" : "NO_PASSWORD");
