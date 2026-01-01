@@ -4,6 +4,11 @@ spring:
   ai:
     openai:
       api-key: ${GEMINI_API_KEY}
+      chat:
+        base-url: https://generativelanguage.googleapis.com
+        completions-path: /v1beta/openai/chat/completions
+        options:
+          model: gemini-2.5-flash
 
 server:
   port: 9007
