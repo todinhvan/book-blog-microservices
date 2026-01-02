@@ -9,12 +9,17 @@ import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.content.Media;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
 import org.springframework.web.multipart.MultipartFile;
 import vn.van.spring_ai_service.dto.request.ChatRequest;
+import vn.van.spring_ai_service.dto.response.BillItem;
+import vn.van.spring_ai_service.dto.response.ExpenseInfo;
+import vn.van.spring_ai_service.dto.response.FilmInfo;
 import vn.van.spring_ai_service.service.ChatService;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -28,17 +33,32 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public String chat(ChatRequest request) {
+    public String chatMessage(ChatRequest request) {
         SystemMessage systemMessage = new SystemMessage("""
                 You are VanAI
                 You should response with a formal voice
                 """);
         UserMessage userMessage = new UserMessage(request.message());
         Prompt prompt = new Prompt(systemMessage, userMessage);
+        return chatClient.prompt(prompt)
+                .call()
+                .content();
+    }
 
-        return chatClient
-                .prompt(prompt)
-                .call().content();
+    @Override
+    public List<FilmInfo> chatFilm(ChatRequest request) {
+        return chatClient.prompt(request.message())
+                .system("You are VanAI")
+                .call()
+                .entity(new ParameterizedTypeReference<List<FilmInfo>>() {});
+    }
+
+    @Override
+    public ExpenseInfo chatExpense(ChatRequest request) {
+        return chatClient.prompt(request.message())
+                .system("You are VanAI")
+                .call()
+                .entity(ExpenseInfo.class);
     }
 
     @Override
@@ -59,6 +79,29 @@ public class ChatServiceImpl implements ChatService {
                         You should response with a formal voice
                         """)
                 .user(promptUserSpec -> promptUserSpec.media(media).text(message))
-                .call().content();
+                .call()
+                .content();
+    }
+
+    @Override
+    public List<BillItem> chatWithBillImage(MultipartFile file, String message) {
+        Media media = Media.builder()
+                .data(file.getResource())
+                .mimeType(MimeTypeUtils.parseMimeType(Objects.requireNonNull(file.getContentType())))
+                .build();
+
+        ChatOptions chatOptions = ChatOptions.builder()
+                .temperature(0.0) // Độ sáng tạo 0.0 -> 1.0
+                .build();
+
+        return chatClient.prompt()
+                .options(chatOptions)
+                .system("""
+                        You are VanAI
+                        The numbers are formatted in Vietnamese locale
+                        """)
+                .user(promptUserSpec -> promptUserSpec.media(media).text(message))
+                .call()
+                .entity(new ParameterizedTypeReference<List<BillItem>>() {});
     }
 }
