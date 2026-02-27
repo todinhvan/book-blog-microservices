@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: PostService
+  data:
+    mongodb:
+      uri: ${DB_URI_CONNECTION:mongodb://root:root@localhost:27017/post-service-data?authSource=admin}
+
+server:
+  port: 9004
+
+app:
+  services:
+    profile: http://localhost:9002/profiles
